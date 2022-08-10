@@ -117,14 +117,14 @@ for index, response in data.iterrows():
     optional = response[opt].strip().replace('&', '\\&')
     if len(optional) > 0:
         optional = optional.replace('. ', '.\n\n')
-        optional = f'\\subsection{{Optional materials}}\n{optional}\n'
+        optional = f'\\subsection{{Optional Materials}}\n\n{optional}\n'
     outline = outline.replace('!!OPTIONAL!!', ascii(optional))
-    attendance = float(response[a])
+    attendance = response[a]
     expl = response[e].strip().replace('&', '\\&')
     if len(expl) == 0:
         expl = DEFAULT
     graded = [ (attendance, 'Attendance and active participation', None, expl )]
-    total = attendance
+    total = float(attendance)
     for entries in group(response[g]):
         if len(entries) >= 2:
             perc = entries[0]

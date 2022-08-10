@@ -7,17 +7,20 @@
 \usepackage{helvet}
 \usepackage{setspace}
 \usepackage{graphicx}
+\usepackage[hyphens]{url}
 \usepackage[hidelinks]{hyperref}
 \usepackage[left=18mm,right=18mm,top=20mm,bottom=40mm]{geometry}
+\usepackage{titling}
+\setlength{\droptitle}{-25mm}
 
 \setlength{\headheight}{25mm}
 %\setlength{\footskip}{5mm}
 
 \pagestyle{fancy}
 \fancyhf{}
-\lfoot{Course Outline, Technology \& Innovation}
+\lfoot{\textcolor{gray}{Course Outline, Technology \& Innovation}}
 \lhead{{\includegraphics[width=120mm]{scs.png}}}
-\rfoot{!!CODE!! (Section !!SECTION!!),  Page {\thepage}/ \pageref{LastPage}}
+\rfoot{\textcolor{gray}{!!CODE!! (Section !!SECTION!!),  Page {\thepage}/ \pageref{LastPage}}}
 
 \setstretch{1.3}
 \setlength{\parskip}{6pt}
@@ -27,7 +30,7 @@
 \date{Section !!SECTION!! for !!TERM!!}
 \author{{\bf McGill University School of Continuing Studies} \\
   {\em Technology \& Innovation} \\
-  !!INSTRUCTOR!! }
+  Taught by !!INSTRUCTOR!! }
 \renewcommand{\familydefault}{\sfdefault} 
 
 \begin{document}
@@ -39,9 +42,13 @@
 
 !!ERROR!!
 
+\setstretch{0.9}
 \tableofcontents
+\setstretch{1.2}
 
 \newpage
+
+\section{Course Information}
 
 \begin{description}
 \item[Office hours]{ !!HOURS!! !!ASSISTANT!! }
@@ -50,11 +57,42 @@
 \item[Instructional methods]{ !!METHODS!! }
 \end{description}
 
+Note that, in accordance with McGill University’s official email
+policy, the instructor {\em will not respond} to email messages sent
+from {\bf outside} the McGill network (e.g., hotmail). As well, while
+instructors appreciate that email correspondence is an efficient
+method of communication, students should keep in mind that instructors
+arenot on call. Students should therefore not expect a response to
+emails during the weekend or after 5:00 p.m., Mondays through
+Fridays.
+
+Prior to contacting instructors via email, students seeking
+course-related information, including information about assignments,
+should first attempt to locate that information by (a) consulting the
+course syllabus or textbook, (b) consulting materialsuploaded to the
+course website (myCourses), or (c) consulting with other students in
+the class. Generally speaking, during the week, a valid request
+submitted via e-mail will receive a response within 36 hours,
+exclusive of weekends and statutory holidays.
+
+\vfill
+
+\hrule
+ 
+{\em The official version of this course outline is the version posted
+  on myCourses or, if any, the printed version distributed by the
+  instructor at the beginning of the course.}
+
+{\em In the event of extraordinary circumstances beyond the
+  University's control, the content and/or evaluation scheme in this
+  course is subject to change.}
+
+
 \newpage
 
-\section{Materials}
+\subsection{Materials}
 
-\subsection{Required materials}
+\subsubsection{Required Materials}
 
 !!REQUIRED!!
 
@@ -62,19 +100,21 @@
 
 \newpage
 
-\section{Evaluation}
+\subsection{Evaluation}
+\label{eval}
 
 \begin{center}
-  \begin{tabular}{p{15mm}|p{30mm}|p{30mm}|p{80mm}}
+\scalebox{0.8}{
+  \begin{tabular}{p{15mm}|p{30mm}|p{30mm}|p{100mm}}
     \% & Item & Deadline & Description \\
     \hline
   !!ITEMS!!
-\end{tabular}
+\end{tabular}}
 \end{center}
 
 \newpage
 
-\section{Course content}
+\subsection{Course Content}
 
 \begin{enumerate}
 \item{!!CONTENT!!}
@@ -82,9 +122,338 @@
 
 \newpage
 
-\section{Complementary information}
+\section{Important Information}
 
-!!INFO!!
+\subsection{Land Acknowledgment}
+
+McGill University is located on land, which has long served as a site
+of meeting and exchange amongst Indigenous peoples, including the
+Haudenosaunee and Anishinabeg nations. McGill honours, recognizes and
+respects these nations as the traditional stewards of the lands and
+waters on which we meet today.
+
+\subsection{McGill Resources for Academic Success}
+
+\begin{description}
+\item[Inclusive Learning Environment]{McGill is committed to providing
+  an inclusive and supportive learning environment. If you Xexperience
+  barriers to learning in this course, do not hesitate to discuss them
+  with your instructor. If you have a special learning need or
+  disability, you are encouraged to contact the Office for Students
+  with Disabilities. For more information, please visit
+  \url{https://mcgill.ca/osd/}.}
+\item[Health and Wellness]{Student well-being is a priority for the
+  University, the School (SCS), and the McGill Association of
+  Continuing Education Students (MACES). Should you find yourself in
+  need of support, please keep in mind that there are a number of
+  resources available to help you. Many SCS students are automatically
+  covered by the MACES Health and Dental Plan. For further details,
+  please visit \url{https://maces.ca/}. In addition, eligible students
+  will also be covered by a virtual healthcare service provided by
+  {\em Dialogue} through MACES. The Dialogue service allows students
+  to connect virtually with nurses and physicians in Canada via a
+  mobile or web app. Both the MACES Health and Dental Plan and the
+  Dialogue app include access to professional psychologists. MACES
+  students also currently have free access to \texttt{Keep.meSAFE}, a
+  psychological counselling service where students can speak to a
+  counsellor in one of six languages. For more information, please
+  visit
+  \url{https://www.mcgill.ca/continuingstudies/student-services}.}
+\item[McGill Writing Centre]{Writing well is key to both academic and
+  professional success. The {\em McGill Writing Centre} (MWC) offers
+  credit courses in academic and professional writing, and a tutorial
+  service open to all McGill students. The tutorial service offers
+  one-to-one sessions with seasoned instructors and experienced tutors
+  who will work with you at any stage of the writing process.  For
+  information about the availability of in-person and online
+  appointments, please visit
+  \url{https://www.mcgill.ca/mwc/tutorial-service}.}
+\item[McGill Library]{Find a workshop, learn about library services,
+  and reach out to your liaison librarian for research help at
+  \url{https://www.mcgill.ca/library/orientation}.}
+\end{description}
+
+\newpage
+
+\subsection{Academic Conduct}
+
+\begin{description} 
+\item[Academic Integrity]{Students are responsible for knowing
+  McGill's rules and regulations concerning academic honesty, which
+  can be found on the Student Rights and Responsibilities
+  website. Violations of academic integrity undermine not only the
+  value of honest students' work, but also the academic integrity of
+  the University and the value of a McGill credential. The Student
+  Rights and Responsibilities website provides resources that can help
+  students avoid dishonest work, and an explanation of the
+  disciplinary measures that go with it. To learn more about academic
+  integrity, visit \url{https://www.mcgill.ca/students/srr/honest}.
+  {\bf All newly admitted students must complete the Academic
+    Integrity Tutorial (AIT) in Minerva during their first semester at
+    McGill.} Failure to complete the tutorial will restrict the
+  student from registering for courses in the following semester. The
+  Tutorial can be accessed as follows: \texttt{Minerva / Student Menu
+    / Academic Integrity Tutorial}.}
+\item[Respectful and Professional Communication]{This course is
+  designed to help you learn to communicate professionally both during
+  your time at McGill and in your future workplaces. In keeping with
+  McGill's policies on student rights and responsibilities, it is
+  expected that during class discussions and small group interactions
+  you will communicate constructively and respectfully. Sexist,
+  racist, homophobic, ageist, and ableist expressions will not be
+  tolerated in the classroom or during group meetings held outside of
+  class.}
+ \end{description}
+
+To learn more about these policies, please consult 
+\url{https://mcgill.ca/students/srr/policies-student-rights-and-responsibilities}.
+
+Students {\bf may not record any class proceedings} or collect any
+electronic data (including photos and videos) from class activities
+without the express consent of the instructor. Instructor generated
+course materials (e.g., handouts, notes, summaries, test questions,
+etc.) are protected by law and may not be copied or distributed in any
+form or in any medium without the explicit permission of the
+instructor. Note that infringements of copyright can be subject to
+followup by the University under the Code of Student Conduct and
+Disciplinary Procedures.
+
+\subsection{Policy Against Sexual Harassment and Violence}
+
+McGill University is committed to creating and sustaining a safe
+environment through proactive, visible, accessible, and effective
+approaches that seek to prevent and respond to sexual harassment and
+sexual violence. McGill's Policy against Sexual Violence underlines
+this commitment and ensures that procedures are in place to address
+complaints. To learn more, visit \url{https://www.mcgill.ca/osvrse/}.
+
+\paragraph{Sexual Violence Training {\em It Takes All of Us}}
+
+In accordance with Québec law (Bill 151), all newly admitted students
+must complete the sexual violence training course, called ``It Takes
+All of Us,'' in myCourses during their first semester at
+McGill. Students will receive an automated email letting them know
+when they have been enrolled in the training course. Failure to
+complete the training will restrict the student from registering for
+courses in the following semester. The training can be accessed
+through myCourses and will appear as a separate course in your
+profile. For more information, please visit \url{https://www.mcgill.ca/osvrse/}.
+
+\subsection{Policy on Harassment and Discrimination}
+
+McGill University is committed to promoting an equitable environment
+where the fundamental dignity of all of its members is respected. The
+objectives of McGill's Policy on Harassment and Discrimination
+Prohibited by Law are to promote education and awareness about equity
+issues and to ensure that procedures are in place to address
+complaints. To learn more about McGill's policy, including how to
+report a complaint, please visit
+\url{https://www.mcgill.ca/how-to-report/}.
+
+\subsection{Right to Submit in English or French}
+
+In accord with McGill University's Charter of Students' Rights,
+students in this course have the right to submit in English or in
+French any written work that is to be graded. This does not apply to
+courses in which acquiring proficiency in a language is one of the
+objectives.
+
+Please reach out to the instructors and the assistants to inquire if
+they are able to additionally advise you in other languages,
+remembering that they are not required to do so. If you do share a
+language, there is no impediment to using that in informal
+discussions, as long as submitted work and any written agreements and
+complaints are either in English or in French.
+
+\subsection{Grades}
+
+\subsubsection{Final Grades}
+
+The official final course grade is the one that appears in the {\em
+  Athena Student Portal} on your Record of Study. A final grade
+appearing in other locations (for example, myCourses) may be subject
+to change.  The School of Continuing Studies reserves the right to
+correct mistakes.
+
+\subsubsection{Undergraduate Credit Course Grading System}
+
+\begin{center}
+  \begin{tabular}{ccc}
+     Result & Numerical Scale (\%) & Letter Grade \\
+   \hline
+Pass & 85--100 & A  \\
+& 80--84 & A- \\
+& 75--79 & B+ \\
+& 70--74 & B \\
+& 65--69 & B- \\
+& 60--64& C+ \\
+& 55--59 & C \\
+& 50--54 & D \\
+Failure & 0--64 & F 
+  \end{tabular}
+  \end{center}
+
+Although a D is a passing grade, it {\em will not permit entry} into a
+subsequent course for which it is aprerequisite, and nor will it be
+recognized if the course is a required course in your program. You
+{\bf must} obtain a grade of C or better in courses that you take to
+fulfil program requirements. Youmay not register in a course unless
+you have passed all the prerequisite courses with a grade of C or
+better, except by written permission of the appropriate department
+chair.
+
+\subsubsection{Graduate Credit Course Grading System}
+
+
+\begin{center}
+  \begin{tabular}{ccc}
+     Result & Numerical Scale (\%) & Letter Grade \\
+   \hline
+Pass & 85--100 & A  \\
+& 80--84 & A- \\
+& 75--79 & B+ \\
+& 70--74 & B \\
+& 65--69 & B- \\
+Failure & 0--64 & F
+  \end{tabular}
+  \end{center}
+
+You must obtain a grade of B- or better in courses that you take to
+fulfil program requirements. Youmay not register in a course unless you
+have passed all the prerequisite courses with a grade of B- or better,
+except by written permission of the appropriate department chair.
+
+\subsubsection{Non-Credit Course Grading System}
+
+\begin{center}
+  \begin{tabular}{ccc}
+     Result & Numerical Scale (\%) & Letter Grade \\
+   \hline
+Pass & 85--100 & A  \\
+& 80--84 & A- \\
+& 75--79 & B+ \\
+& 70--74 & B \\
+& 65--69 & B- \\
+Failure & 0--64 & F
+  \end{tabular}
+  \end{center}
+
+You must obtain a grade of B- or better to fulfil program
+requirements. You may not register in a course unless you have passed
+all the prerequisite courses with a grade of B- or better.
+
+\paragraph{What does a final course grade of $J$ mean?}
+
+A $J$ grade is a failing grade due to either (i) an unexcused absence
+for an official final exam, or (ii) failure to submit required work
+worth more than 20\% of the final grade for the course as a whole. A
+$J$ grade is calculated as a failure.
+
+To learn more about University letter grades, visit
+\url{https://www.mcgill.ca/study/20182019/university_regulations_and_resources/continuing/scs_gi_student_records_grading_grade_point_average}.
+
+\subsection{Assessments}
+
+Work submitted for evaluation as part of this course {\bf may be
+  checked with text-matching software} within myCourses.
+
+To learn more about assessment of student work, consult McGill's
+Student Assessment Policy at
+\url{https://mcgill.ca/secretariat/files/secretariat/2016-04_student_assessment_policy.pdf}.
+
+
+\subsubsection{Assignments}
+
+Please refer to Section \ref{eval} concerning assignment submission
+for this course.  Legitimate exceptions for late submission of
+assignments include documented medical, family, and personal
+emergencies, and observance of holy days. Students planning to observe
+holy days (see
+\url{https://www.mcgill.ca/importantdates/holy-days-0/policy-holy-days})
+listed in the McGill calendar should notify the instructor by email no
+later than two (2) weeks prior, and preferably at the beginning of the
+course.
+
+\subsubsection{Examinations}
+
+If the course includes exams, students should not make other
+commitments during a scheduled exam, which is indicated on your course
+outline. Vacation plans do not constitute valid grounds for the
+deferral or the rescheduling of examinations, tests or
+assignments. See the School of Continuing Studies Calendar for the
+regulations governing examinations, or go to
+\url{https://www.mcgill.ca/continuingstudies/current-students/exams}.
+
+Students who have a documented disability and require academic
+accommodation must contact McGill's Office for Students with
+Disabilities (OSD). For information on Exam Accommodation, visit
+\url{https://www.mcgill.ca/osd/exams} and
+\url{https://mcgill.ca/osd/student-resources/forms/scs-accommodation-request}.
+
+
+Students may {\em request a deferral} of final examinations or timed
+tests and assignments for medical reasons or out-of-town business
+commitments, which must be justified in writing with a medical
+certificate or company letter. To learn more, visit
+\url{https://www.mcgill.ca/continuingstudies/exams-conflicts-deferrals-and-rereads}.
+
+
+Students requesting the {\em rescheduling of a mid-term
+  examination(s)} due to a religious, business-related,or scheduling
+conflict must submit the Mid-term Examination Conflict form, together
+with supporting documentation, to the School of Continuing Studies,
+Client Services Office, at least two (2) weeks prior to the date of
+the scheduled mid-termexamination(s). Students who miss a mid-term
+examination(s) due to medical reasons must complete and submit the
+Mid-term Examination Conflict form, with supporting documentation,
+within two (2) business days from the date of the missed
+mid-termexamination(s). The forms are available at
+\url{https://www.mcgill.ca/continuingstudies/forms}.
+
+Examination schedules are posted online approximately six (6) weeks
+before the examination period begins. The exam schedule can be found
+at
+\url{https://www.mcgill.ca/continuingstudies/important-dates-exam-information}.
+
+\newpage
+
+\subsection{Resources }
+
+\begin{description}
+\item[Student Services]{Various services are available to Continuing
+  Studies students. To learn more, visit \url{https://www.mcgill.ca/continuingstudies/getting-started}.}
+\item[Students with Disabilities]{McGill is committed to providing an
+  inclusive learning environment. If you experience barriers to
+  learning in this course, do not hesitate to discuss them with me. If
+  you have a special learning need or disability, you are encouraged
+  to contact the Office for Students with Disabilities. To learn more,
+  visit \url{https://www.mcgill.ca/osd}.}
+ \item[Computer Labs]{Free access to computer labs is available at 688
+   Sherbrooke (12th floor), MACES, the McLennan Library and other
+   locations on campus.}
+ \item[MACES]{The McGill Association of Continuing Education Students
+   (MACES) is located at 3437 Peel, 2nd floor, tel. (514) 398-4974. To
+   learn more, visit \url{https://maces.ca/}.}
+\item[Career Advising and Transition Services]{Gain the clarity,
+  skills, confidence and connections you need to succeed in your
+  career thanks to the support provided by {\em Career Advising and
+    Transition Services} (CATS). To learn more, visit
+  \url{https://www.mcgill.ca/continuingstudies/career-advising-and-transition-services}.}
+\item[myCourses]{Please check the myCourses site on a daily
+  basis. Failure to do so may result in your missing important
+  information. Neither absence from class nor failure to check
+  myCourses is anacceptable excuse for being unaware of important
+  course-related information.}
+\item[Minerva]{Access your personal student information online
+  \url{https://horizon.mcgill.ca/pban1/twbkwbis.P_WWWLogin}. For
+  issues related to student accounts, please call 514-398-7878.}
+\item[Athena]{For non-credit courses, access your student profile and
+  course information including online access to myCourses at
+  \url{https://continuingstudies.mcgill.ca/portal/logon.do?method=load}.}
+\item[IT Support]{Information related to online resources such as
+  email,VPN, myCourses, etc. can be found at IT Services
+  \url{https://www.mcgill.ca/it/}.}
+\end{description}
 
 \label{LastPage}
 
