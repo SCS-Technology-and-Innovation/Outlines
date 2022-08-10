@@ -1,0 +1,93 @@
+\documentclass{article}
+
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{fancyhdr}
+\usepackage{xcolor}
+\usepackage{helvet}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage[hidelinks]{hyperref}
+\usepackage[left=18mm,right=18mm,top=20mm,bottom=40mm]{geometry}
+
+\setlength{\headheight}{25mm}
+%\setlength{\footskip}{5mm}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lfoot{Course Outline, Technology \& Innovation}
+\lhead{{\includegraphics[width=120mm]{scs.png}}}
+\rfoot{!!CODE!! (Section !!SECTION!!),  Page {\thepage}/ \pageref{LastPage}}
+
+\setstretch{1.3}
+\setlength{\parskip}{6pt}
+\setlength{\parindent}{0pt}
+
+\title{Course outline for !!CODE!! \\ {\sc !!NAME!!}}
+\date{Section !!SECTION!! for !!TERM!!}
+\author{{\bf McGill University School of Continuing Studies} \\
+  {\em Technology \& Innovation} \\
+  !!INSTRUCTOR!! }
+\renewcommand{\familydefault}{\sfdefault} 
+
+\begin{document}
+
+
+\maketitle
+
+\thispagestyle{fancy}
+
+!!ERROR!!
+
+\tableofcontents
+
+\newpage
+
+\begin{description}
+\item[Office hours]{ !!HOURS!! !!ASSISTANT!! }
+\item[Description]{ !!DESCRIPTION!! }
+\item[Learning outcomes]{ !!OUTCOMES!! }
+\item[Instructional methods]{ !!METHODS!! }
+\end{description}
+
+\newpage
+
+\section{Materials}
+
+\subsection{Required materials}
+
+!!REQUIRED!!
+
+!!OPTIONAL!!
+
+\newpage
+
+\section{Evaluation}
+
+\begin{center}
+  \begin{tabular}{p{15mm}|p{30mm}|p{30mm}|p{80mm}}
+    \% & Item & Deadline & Description \\
+    \hline
+  !!ITEMS!!
+\end{tabular}
+\end{center}
+
+\newpage
+
+\section{Course content}
+
+\begin{enumerate}
+\item{!!CONTENT!!}
+\end{enumerate}
+
+\newpage
+
+\section{Complementary information}
+
+!!INFO!!
+
+\label{LastPage}
+
+
+
+\end{document}
