@@ -1,6 +1,4 @@
 *.xlsx
-*.png
 *~
-*.aux
-*.log
-*.pdf
+venv
+.vscode/launch.json
