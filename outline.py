@@ -7,7 +7,27 @@ THRESHOLD = 0.02
 DEFAULT = 'This course consists of a community of learners of which you are an integral member; your active participation is therefore essential to its success. This means: attending class; visiting myCourses, doing the assigned readings/exercises before class; and engaging in class discussions/activities.'
 
 def ascii(text):
-    return ''.join(i for i in text if ord(i) < 128)
+    if '&' in text and '\\&' not in text:
+        text = text.replace('&', '\\&') # LaTeX not accounted for
+    if '%' in text and '\\%' not in text:
+        text = text.replace('%', '\\%')
+    text = text.replace('$', '\\$') # not contemplating math mode
+    text = text.replace('_', '') # no underscores are permitted here
+    text = text.replace('#', '') # not needed, really
+    text = ''.join(i for i in text if ord(i) < 128) # no unicode
+    clean = []
+    for line in text.split('\n'):
+        words = []
+        for word in line.split():
+            if 'http' in word and '://' in word: # url
+                if '\\url' not in word: # needs to be linked
+                    # no parenthesis
+                    word = word.replace('(', '')
+                    word = word.replace(')', '')
+                    word = f'\\url{{{word}}}'
+            words.append(word)
+        clean.append(' '.join(words))
+    return '\n'.join(clean)
 
 def contact(text):
     clean = []
@@ -19,6 +39,8 @@ def contact(text):
     text = text.replace('; ', '')    
     text = text.replace('>', '')
     text = text.replace('(tbc)', '')
+    if '. ' in text: # LaTeX space cancelling
+        text = text.replace('. ', '.\\ ') 
     for word in text.split():
         if '@' in word:
             link = f'\\href{{mailto:{word}}}{{{word}}}' 
@@ -28,12 +50,9 @@ def contact(text):
     return ' '.join(clean)
 
 def group(line):
-    line = line.replace('%', '') # no percent symbols are wanted here
-    line = line.replace('_', '') # no underscores are permitted here
-    line = line.replace('#', '\#')
-    line = line.replace('&', '\&')
     line = line.replace('//', '\n') # this is for Mike
-    line = line.replace('- ', '\n') # this is for Mohammad
+    line = line.replace('- ', '\n') # this is for Mohammad    
+    line = ascii(line)
     lines = []
     if '\n' not in line: # a single-line answer
         tokens = line.split(';')
@@ -46,6 +65,9 @@ def group(line):
         for entry in line.split('\n'):
             lines.append(entry.split(';'))
     return lines
+
+# load the course information sheet
+info = pd.read_csv('courses.csv')
 
 # load the template
 with open('outline.tex') as source:
@@ -82,48 +104,84 @@ for index, response in data.iterrows():
         code = parts[0]
         section = parts[1]
     if 'CRN' in section:
-        error = 'Extra details provided in section number\n'
+        error = '\nExtra details provided in section number\n'
         if '(' in section:
             section = section.split('(').pop(0).strip()
     if 'Fall' in section:
-        error = 'Actual section number is missing\n'
+        error = '\nActual section number is missing\n'
         section = 'XXX'
+    if '-' in code: # someone wrote <YCIT 001 - 001>
+        parts = code.split('-')
+        section = parts[-1].strip()
+        code = parts[0].strip()
+    if ' ' in code:
+        lettercode, numbercode = code.split(' ')
+    else:
+        lettercode = code[:3]
+        numbercode = code[4:]
     outline = template.replace('!!CODE!!', code)
     outline = outline.replace('!!SECTION!!', section)    
     code = code.replace(' ', '') # no spaces in the filename
     output = f'{code}-{section}.tex'
-    outline = outline.replace('!!NAME!!', response[t].strip()) # course title
+    outline = outline.replace('!!NAME!!', ascii(response[t])) # course title
     outline = outline.replace('!!CODE!!', code)
     outline = outline.replace('!!SECTION!!', section)
     outline = outline.replace('!!INSTRUCTOR!!', contact(response[i].strip())) # instructor
     # pending: insert information on TA/CA into !!ASSISTANT!!
-    outline = outline.replace('!!ASSISTANT!!', '\n\\\\\n\\textcolor{blue}{Course assistant information to be inserted soon.}')
-    hours = response[h].strip()
+    outline = outline.replace('!!ASSISTANT!!', '\\textcolor{blue}{Teaching/course assistant information to be inserted soon.}')
+    hours = response.get(h, '')
     if len(hours) == 0:
         hours = 'Upon request'
-    outline = outline.replace('!!HOURS!!', hours)
-    outline = outline.replace('!!DESCRIPTION!!', response[d].strip())
-    outline = outline.replace('!!OUTCOMES!!', response[o].strip().replace('&', '\\&'))
-    method = response[m].strip().replace('&', '\\&')
+    outline = outline.replace('!!HOURS!!', hours.strip())
+
+    details = info.loc[(info['Code'] == lettercode) & (info['Number'] == int(numbercode))]
+    if details.empty:
+        error += '\nCourse details are not in the domain catalogue, corresponding fields will not be populated\n'
+    else:
+        prereq = details['Pre-requisites'].iloc[0]
+        if pd.isna(prereq):
+            outline = outline.replace('!!PREREQ!!', 'None')        
+        else:
+            outline = outline.replace('!!PREREQ!!', prereq)
+        coreq = details['Co-requisites'].iloc[0]
+        if pd.isna(coreq):
+            outline = outline.replace('!!COREQ!!', 'None')
+        else:
+            outline = outline.replace('!!COREQ!!', coreq)
+        amount = details['Credit amount'].iloc[0]
+        if details['Credit type'].iloc[0] == 'credits':
+            outline = outline.replace('!!CREDITS!!', f'{amount} credits')
+        else:
+            outline = outline.replace('!!CREDITS!!', f'{amount} CEUs')
+        h = details['Contact hours'].iloc[0]
+        outline = outline.replace('!!CONTACT!!', f'{h} hours')
+        h = details['Approximate assignment hours'].iloc[0]
+        outline = outline.replace('!!ASSIGNMENT!!', f'{h} hours')
+
+    outline = outline.replace('!!DESCRIPTION!!', ascii(response[d]))
+    outline = outline.replace('!!OUTCOMES!!', ascii(response[o]))
+    method = ascii(response[m])
     if len(method) == 0:
         method = 'Teaching and learning approach is experiential, collaborative, and problem-based'
     outline = outline.replace('!!METHODS!!', method)
-    required = response[req].strip().replace('&', '\\&')
+    required = ascii(response[req])
     if len(required) == 0:
         required = 'Readings and assignments provided through myCourses'
     else:
         required = required.replace('. ', '.\n\n')        
     outline = outline.replace('!!REQUIRED!!', ascii(required))
-    optional = response[opt].strip().replace('&', '\\&')
+    optional = ascii(response[opt])
     if len(optional) > 0:
         optional = optional.replace('. ', '.\n\n')
         optional = f'\\subsection{{Optional Materials}}\n\n{optional}\n'
     outline = outline.replace('!!OPTIONAL!!', ascii(optional))
     attendance = response[a]
-    expl = response[e].strip().replace('&', '\\&')
+    expl = ascii(response[e])
     if len(expl) == 0:
         expl = DEFAULT
-    graded = [ (attendance, 'Attendance and active participation', None, expl )]
+    graded = [ (attendance,
+                'Attendance and active participation',
+                'See myCourses for more information', expl )]
     total = float(attendance)
     for entries in group(response[g]):
         if len(entries) >= 2:
@@ -142,9 +200,9 @@ for index, response in data.iterrows():
         error = f'Parsing identified {total} percent for the grade instead of 100 percent.'
     items = '\\\\\n\\hline\n'.join([ f'{ip} & {it} & {idl} & {idesc}' for (ip, it, idl, idesc) in graded ])
     outline = outline.replace('!!ITEMS!!', items)
-    sessions = [ response[header.index(f'Session {k}')].replace('&', '\\&').replace('#', '\\#') for k in range(1, 14) ]
-    content = '\n'.join([ f'\\item{{{r}}}' if len(r) > 0 else '' for r in sessions ])
-    outline = outline.replace('\\item{!!CONTENT!!}', content)
+    sessions = [ ascii(response[header.index(f'Session {k}')]) for k in range(1, 14) ]
+    content = '\n'.join([ f'\\item{{{ascii(r)}}}' if len(r) > 0 else '' for r in sessions ])
+    outline = outline.replace('\\item{!!CONTENT!!}', ascii(content))
     outline = outline.replace('!!INFO!!', '\\textcolor{blue}{Complementary information to be inserted soon.}')    
     if len(error) > 0:
         error = f'\\textcolor{{red}}{{{error}}}'
