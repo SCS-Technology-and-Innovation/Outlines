@@ -123,9 +123,10 @@ for listing in locations:
                 co = None
                 s = []
                 if c is None: # the business intelligence diploma courses just show up
-                    c = Course(code, number, 3, 'credit')
+                    c = Course(code, number, 3, 'credits')
                     c.descr = '' # we do not have these just now
                     c.title = name
+                    c.contact = 39
                     records[label] = c
                 for field in column.get_text().split():
                     field = field.replace(',', '').strip().lstrip()

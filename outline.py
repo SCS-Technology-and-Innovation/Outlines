@@ -169,8 +169,11 @@ for index, response in data.iterrows():
         h = details['Contact hours'].iloc[0]
         outline = outline.replace('!!CONTACT!!', f'{h} hours')
         h = details['Approximate assignment hours'].iloc[0]
-        outline = outline.replace('!!ASSIGNMENT!!', f'{h} hours')
-
+        if pd.isna(h):
+            outline = outline.replace('!!ASSIGNMENT!!','') # nothing goes here
+        else:
+            outline = outline.replace('!!ASSIGNMENT!!',
+                                      f'\\item[Independent study hours]{{Approximately {h} hours }}')
     outline = outline.replace('!!DESCRIPTION!!', ascii(response[d]))
     outline = outline.replace('!!OUTCOMES!!', ascii(response[o]))
     method = ascii(response[m])
