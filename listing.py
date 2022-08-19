@@ -54,6 +54,9 @@ locations = { 'datasci.html' :
               'https://www.mcgill.ca/continuingstudies/area-of-study/data-science',
               'inftech.html' :
               'https://www.mcgill.ca/continuingstudies/area-of-study/information-technology',
+              # the website is so bad...
+              'inftech2.html':
+              'https://www.mcgill.ca/continuingstudies/area-of-study/information-technology?tid=738&page=0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C1',
               'cybersec.html' : PREFIX + '131' ,
               'compit.html' : PREFIX + '134',
               'busint.html': PREFIX + '106',
@@ -67,12 +70,14 @@ skip = [ 'https://www.mcgill.ca/continuingstudies/registration',
 records = dict()
 
 for listing in locations:
+    print('Parsing', listing)
     if not path.exists(listing):
         sleep(randint(1, 5))
         r = requests.get(locations[listing], hdr)
         content = ' '.join(r.text.split()) # tons of whitespace
         with open(listing, 'w') as target:
             print(content, file = target)
+        print('Downloaded', listing)            
     with open(listing) as source:
         text = source.read()
     soup = BeautifulSoup(text, 'html.parser')
@@ -81,62 +86,71 @@ for listing in locations:
         for row in content.find_all('tr'):
             columns = row.find_all('td')
             if len(columns) == 0:
-                continue # no cells in this row
+                print('Ignoring an empty table row')
+                continue
             column = columns.pop(0)
             fields = column.get_text().split()
-            if len(fields) == 2:
+            if len(fields) >= 2:
                 code = fields.pop(0)
                 number = fields.pop(0)
+                print('Parsing', code, number)
                 label = (code, number)
-                if label in records: # this is a known course
-                    c = records[label]
-                    column = columns.pop(0)
-                    url = PREFIX + column.find('a')['href']
-                    filename = f'{code}{number}.html'
-                    if not path.exists(filename):
-                        sleep(randint(1, 5))
-                        r = requests.get(url, hdr)
-                        content = ' '.join(r.text.split()) # tons of whitespace
-                        with open(filename, 'w') as target:
-                            print(content, file = target)
+                c = records.get(label, None)
+                column = columns.pop(0)
+                url = PREFIX + column.find('a')['href']
+                filename = f'{code}{number}.html'
+                if not path.exists(filename):
+                    sleep(randint(1, 5))
+                    r = requests.get(url, hdr)
+                    content = ' '.join(r.text.split()) # tons of whitespace
+                    with open(filename, 'w') as target:
+                        print(content, file = target)
+                if c is not None:
                     c.urls.add(url)
-                    name = ' '.join(column.get_text().split())
-                    name = name.replace(code, '') # no idea why one course repeats these
-                    name = name.replace(number, '') # ^^^
-                    name = name.strip().lstrip()
-                    # abbreviations mess things up
-                    name = name.replace('Dev.', 'Development')
-                    name = name.replace('&', 'and')
-                    name = name.replace('Tech.', 'Technology')
-                    name = name.replace('Cloud Computer', 'Cloud Computing') # this is an error on a website
+                name = ' '.join(column.get_text().split())
+                name = name.replace(code, '') # no idea why one course repeats these
+                name = name.replace(number, '') # ^^^
+                name = name.strip().lstrip()
+                # abbreviations mess things up
+                name = name.replace('Dev.', 'Development')
+                name = name.replace('&', 'and')
+                name = name.replace('Tech.', 'Technology')
+                name = name.replace('Cloud Computer', 'Cloud Computing') # this is an error on a website
+                if c is not None:
                     assert name == c.title
-                    column = columns.pop(0)
-                    cor = False
-                    co = None
-                    s = []
-                    for field in column.get_text().split():
-                        field = field.replace(',', '').strip().lstrip()
-                        if 'Co-' in field:
-                            cor = True
-                        elif 'Pre' in field:
-                            continue # default
-                        elif len(field) == 4 and field.isupper():
-                            co = field # this is a course code
-                        elif len(field) == 3 and field.isnumeric():
-                            nu = field # this is a course number
-                            assert co is not None
-                            if cor:
+                column = columns.pop(0)
+                cor = False
+                co = None
+                s = []
+                if c is None: # the business intelligence diploma courses just show up
+                    c = Course(code, number, 3, 'credit')
+                    c.descr = '' # we do not have these just now
+                    c.title = name
+                    records[label] = c
+                for field in column.get_text().split():
+                    field = field.replace(',', '').strip().lstrip()
+                    if 'Co-' in field:
+                        cor = True
+                    elif 'Pre' in field:
+                        continue # default
+                    elif len(field) == 4 and field.isupper():
+                        co = field # this is a course code
+                    elif len(field) == 3 and field.isnumeric():
+                        nu = field # this is a course number
+                        assert co is not None
+                        if cor:
+                            if c is not None:
                                 c.coreq.add(f'{co} {nu}')
-                                cor = False
-                            else:
+                            cor = False
+                        else:
+                            if c is not None:
                                 c.prereq.add(f'{co} {nu}')
                             co = None
-                        else:
-                          s.append(field)
-                    if len(s) > 0:
+                    else:
+                        s.append(field)
+                if len(s) > 0:
+                    if c is not None:
                         c.prereq.add(' '.join(s)) # written notes
-                continue
-        continue # the area of study listings have a different format
     for course in soup.find_all('div', { 'class' : 'course' }):
         t = course.find('div', { 'class': 'title' })
         if t is None:

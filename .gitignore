@@ -4,3 +4,6 @@
 *.aux
 *.log
 *.pdf
+*.html
+*.out
+*.toc

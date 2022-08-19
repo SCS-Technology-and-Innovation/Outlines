@@ -76,11 +76,11 @@ template = template.replace('!!TERM!!', 'Fall 2022') # update the term/year
     
 # load the outline responses
 responses = pd.ExcelFile('outline.xlsx')
-data  = responses.parse(responses.sheet_names[0])
-data.fillna('', inplace = True)
-fields = dict()
-
-header = [h.strip() for h in data.columns.values.tolist()]
+forms  = responses.parse(responses.sheet_names[0])
+# drop the first five columns
+forms = forms.iloc[: , 5:]
+print('Responses from MS Forms', forms.shape)
+header = [h.strip() for h in forms.columns.values.tolist()]
 t = header.index('Course title')
 n = header.index('Course number')
 s = header.index('Section number')
@@ -94,14 +94,22 @@ m = header.index('Instructional methods')
 a = header.index('% for Attendance and active participation')
 e = header.index('Explanation for Attendance and active participation')
 g = header.index('Other graded items')
+edited = pd.read_csv('sharepoint.csv', header = [0], engine = 'python') # these have double quotes
+print('Responses from Sharepoint', edited.shape)
+edited.columns = forms.columns # same header
+data = pd.concat([forms, edited], axis = 0, ignore_index = True)
+print('Combined responses', data.shape)
+data.fillna('', inplace = True)
 
+fields = dict()
 for index, response in data.iterrows():
     error = ''
     code = response[n].strip() # course number
+    print('Processing', code)
     section = response[s].strip() # course section
     if len(section) == 0 and '-' in code:
         parts = code.split('-')
-        code = parts[0]
+        code = parts[0].strip()
         section = parts[1]
     if 'CRN' in section:
         error = '\nExtra details provided in section number\n'
@@ -114,6 +122,8 @@ for index, response in data.iterrows():
         parts = code.split('-')
         section = parts[-1].strip()
         code = parts[0].strip()
+    lettercode = None
+    numbercode = None
     if ' ' in code:
         lettercode, numbercode = code.split(' ')
     else:
@@ -133,9 +143,12 @@ for index, response in data.iterrows():
     if len(hours) == 0:
         hours = 'Upon request'
     outline = outline.replace('!!HOURS!!', hours.strip())
-
-    details = info.loc[(info['Code'] == lettercode) & (info['Number'] == int(numbercode))]
-    if details.empty:
+    details = None
+    if lettercode is not None and numbercode is not None:
+        details = info.loc[(info['Code'] == lettercode) & (info['Number'] == int(numbercode))]
+    else:
+        error += '\nCourse code specification not found'
+    if details is None or details.empty:
         error += '\nCourse details are not in the domain catalogue, corresponding fields will not be populated\n'
     else:
         prereq = details['Pre-requisites'].iloc[0]
