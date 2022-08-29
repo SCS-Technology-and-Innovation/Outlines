@@ -135,6 +135,9 @@ fields = dict()
 for index, response in data.iterrows():
     error = ''
     code = response[n].strip() # course number
+    if len(code) < 3:
+        print('Skipping an empty row')
+        continue
     print('Processing', code)
     section = response[s].strip() # course section
     if len(section) == 0 and '-' in code:
