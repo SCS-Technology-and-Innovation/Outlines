@@ -69,6 +69,36 @@ def group(line):
 # load the course information sheet
 info = pd.read_csv('courses.csv')
 
+# load the TA information
+TAinfo = pd.ExcelFile('Teaching_Assistants.xlsx')
+TAs  = TAinfo.parse(TAinfo.sheet_names[0])
+TAh = [h.strip() for h in TAs.columns.values.tolist()]
+tacl = TAh.index('Course')
+tacn = TAh.index('Code')
+tas = TAh.index('Section')
+tat = TAh.index('Teaching/Course Assistant')
+tan = TAh.index('Candidate')
+
+assistant = dict()
+for index, row in TAs.iterrows():
+    name = row[tan]
+    if not  isinstance(name, str):
+        break
+    name = name.lstrip().strip()
+    code = row[tacl].strip()
+    number = row[tacn]
+    section = row[tas]
+    kind = row[tat]
+    if 'TA 120' in name:
+        name = name.replace('TA 120', '')
+    if 'low registration' in name:
+        continue
+    details = f'\item[Assistant ({kind})]{{{name}}}'
+    print(code, number, details)
+    assistant[f'{code} {number}', section] = details
+
+allbymyself = '' # no TA, no CA (say nothing for now)
+    
 # load the template
 with open('outline.tex') as source:
     template = source.read()
@@ -131,6 +161,7 @@ for index, response in data.iterrows():
         numbercode = code[4:]
     outline = template.replace('!!CODE!!', code)
     outline = outline.replace('!!SECTION!!', section)    
+    outline = outline.replace('!!ASSISTANT!!', assistant.get((code, section), allbymyself))
     code = code.replace(' ', '') # no spaces in the filename
     output = f'{code}-{section}.tex'
     outline = outline.replace('!!NAME!!', ascii(response[t])) # course title
@@ -138,7 +169,6 @@ for index, response in data.iterrows():
     outline = outline.replace('!!SECTION!!', section)
     outline = outline.replace('!!INSTRUCTOR!!', contact(response[i].strip())) # instructor
     # pending: insert information on TA/CA into !!ASSISTANT!!
-    outline = outline.replace('!!ASSISTANT!!', '\\textcolor{blue}{Teaching/course assistant information to be inserted soon.}')
     hours = response.get(h, '')
     if len(hours) == 0:
         hours = 'Upon request'
