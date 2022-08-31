@@ -2,9 +2,16 @@
 # pip install openpyxl
 import pandas as pd
 from math import fabs
+from datetime import datetime
+from os.path import exists
+
+SHAREPOINT = '15/08/2022 23:55:00'
+CUTOFF = datetime.strptime(SHAREPOINT, '%d/%m/%Y %H:%M:%S')
 
 THRESHOLD = 0.02
 DEFAULT = 'This course consists of a community of learners of which you are an integral member; your active participation is therefore essential to its success. This means: attending class; visiting myCourses, doing the assigned readings/exercises before class; and engaging in class discussions/activities.'
+
+wrong = set()
 
 def ascii(text):
     if '&' in text and '\\&' not in text:
@@ -50,20 +57,16 @@ def contact(text):
     return ' '.join(clean)
 
 def group(line):
-    line = line.replace('//', '\n') # this is for Mike
-    line = line.replace('- ', '\n') # this is for Mohammad    
     line = ascii(line)
     lines = []
-    if '\n' not in line: # a single-line answer
-        tokens = line.split(';')
-        while len(tokens) > 4:
-            lines.append(tokens[:4]) # supposed to have four fields per line
-            tokens = tokens[4:]
-        lines.append(tokens)
-        return lines
-    else:
-        for entry in line.split('\n'):
-            lines.append(entry.split(';'))
+    for entry in line.split('\n'):
+        cols = entry.split(';')
+        if len(cols) > 4: # format not respected, extra columns cut off
+            # print('WAY TOO MANY COLUMNS', entry)
+            cols = cols[:4]
+        while len(cols) < 4:
+            cols.append('') # empty missing columns
+        lines.append(cols)
     return lines
 
 # load the course information sheet
@@ -94,7 +97,7 @@ for index, row in TAs.iterrows():
     if 'low registration' in name:
         continue
     details = f'\item[Assistant ({kind})]{{{name}}}'
-    print(code, number, details)
+    number = '{:03d}'.format(number)
     assistant[f'{code} {number}', section] = details
 
 allbymyself = '' # no TA, no CA (say nothing for now)
@@ -107,9 +110,18 @@ template = template.replace('!!TERM!!', 'Fall 2022') # update the term/year
 # load the outline responses
 responses = pd.ExcelFile('outline.xlsx')
 forms  = responses.parse(responses.sheet_names[0])
+
+completion= pd.to_datetime(forms.iloc[:, 2], format = '%m-%d%-y %H:%M:%S')
+b = completion < CUTOFF
+a = completion >= CUTOFF
 # drop the first five columns
 forms = forms.iloc[: , 5:]
-print('Responses from MS Forms', forms.shape)
+# split into two for the people who do not read teams
+before = forms.loc[b]
+after = forms.loc[a]
+
+print('Responses from Forms pre-sharepoint', before.shape)
+print('Responses from Forms post-sharepoint', after.shape)
 header = [h.strip() for h in forms.columns.values.tolist()]
 t = header.index('Course title')
 n = header.index('Course number')
@@ -126,31 +138,32 @@ e = header.index('Explanation for Attendance and active participation')
 g = header.index('Other graded items')
 edited = pd.read_csv('sharepoint.csv', header = [0], engine = 'python') # these have double quotes
 print('Responses from Sharepoint', edited.shape)
-edited.columns = forms.columns # same header
-data = pd.concat([forms, edited], axis = 0, ignore_index = True)
+edited.columns = before.columns # same header
+data = pd.concat([before, edited, after], axis = 0, ignore_index = True)
 print('Combined responses', data.shape)
 data.fillna('', inplace = True)
 
 fields = dict()
+
 for index, response in data.iterrows():
     error = ''
     code = response[n].strip() # course number
     if len(code) < 3:
         print('Skipping an empty row')
         continue
-    print('Processing', code)
-    section = response[s].strip() # course section
+    section = str(response[s]).strip() # course section 
     if len(section) == 0 and '-' in code:
         parts = code.split('-')
         code = parts[0].strip()
         section = parts[1]
     if 'CRN' in section:
-        error = '\nExtra details provided in section number\n'
+        # error = '\nExtra details provided in section number\n'
         if '(' in section:
             section = section.split('(').pop(0).strip()
     if 'Fall' in section:
         error = '\nActual section number is missing\n'
-        section = 'XXX'
+        print(code, 'lacks section number, omitting')
+        continue
     if '-' in code: # someone wrote <YCIT 001 - 001>
         parts = code.split('-')
         section = parts[-1].strip()
@@ -166,12 +179,18 @@ for index, response in data.iterrows():
     outline = outline.replace('!!SECTION!!', section)    
     outline = outline.replace('!!ASSISTANT!!', assistant.get((code, section), allbymyself))
     code = code.replace(' ', '') # no spaces in the filename
+    section = str(section)
+    while len(section) < 3:
+        section = '0' + section
     output = f'{code}-{section}.tex'
+    if exists(output):
+        print('Reprocessing', output)
+    else:
+        print('Processing', output)
     outline = outline.replace('!!NAME!!', ascii(response[t])) # course title
     outline = outline.replace('!!CODE!!', code)
     outline = outline.replace('!!SECTION!!', section)
     outline = outline.replace('!!INSTRUCTOR!!', contact(response[i].strip())) # instructor
-    # pending: insert information on TA/CA into !!ASSISTANT!!
     hours = response.get(h, '')
     if len(hours) == 0:
         hours = 'Upon request'
@@ -200,6 +219,8 @@ for index, response in data.iterrows():
         else:
             outline = outline.replace('!!CREDITS!!', f'{amount} CEUs')
         h = details['Contact hours'].iloc[0]
+        if pd.isna(h): # credit-side default is 39
+            h = 39
         outline = outline.replace('!!CONTACT!!', f'{h} hours')
         h = details['Approximate assignment hours'].iloc[0]
         if pd.isna(h):
@@ -224,9 +245,9 @@ for index, response in data.iterrows():
         optional = optional.replace('. ', '.\n\n')
         optional = f'\\subsection{{Optional Materials}}\n\n{optional}\n'
     outline = outline.replace('!!OPTIONAL!!', ascii(optional))
-    attendance = response[a]
+    attendance = response[a] # should be a number
     expl = ascii(response[e])
-    if len(expl) == 0:
+    if attendance > 0 and len(expl) == 0:
         expl = DEFAULT
     graded = [ (attendance,
                 'Attendance and active participation',
@@ -236,6 +257,7 @@ for index, response in data.iterrows():
         if len(entries) >= 2:
             perc = entries[0]
             contrib = 0
+            value = 0
             try:
                 value = float(perc)
             except:
@@ -255,6 +277,15 @@ for index, response in data.iterrows():
     outline = outline.replace('!!INFO!!', '\\textcolor{blue}{Complementary information to be inserted soon.}')    
     if len(error) > 0:
         error = f'\\textcolor{{red}}{{{error}}}'
+        if output not in wrong and exists(output):
+            print('Omitting a broken version for', output, 'since an error-free one exists')
+            continue
+        wrong.add(output)
+        print('Storing a version of', output, 'that contains errors:, error')
+    else:
+        if output in wrong:
+            wrong.remove(output)
+        print('Storing an error-free version of', output)
     outline = outline.replace('!!ERROR!!', error)
     with open(output, 'w') as target:
         print(outline, file = target)
