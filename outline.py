@@ -98,7 +98,8 @@ for index, row in TAs.iterrows():
         continue
     details = f'\item[Assistant ({kind})]{{{name}}}'
     number = '{:03d}'.format(number)
-    assistant[f'{code} {number}', section] = details
+    print(code, number, section, details)
+    assistant[f'{code} {number} {section}'] = details
 
 allbymyself = '' # no TA, no CA (say nothing for now)
     
@@ -176,8 +177,9 @@ for index, response in data.iterrows():
         lettercode = code[:3]
         numbercode = code[4:]
     outline = template.replace('!!CODE!!', code)
-    outline = outline.replace('!!SECTION!!', section)    
-    outline = outline.replace('!!ASSISTANT!!', assistant.get((code, section), allbymyself))
+    outline = outline.replace('!!SECTION!!', section)
+    print('Retrieving CA/TA for', code, section)
+    outline = outline.replace('!!ASSISTANT!!', assistant.get(f'{code} {section}', allbymyself))
     code = code.replace(' ', '') # no spaces in the filename
     section = str(section)
     while len(section) < 3:
@@ -197,6 +199,7 @@ for index, response in data.iterrows():
     outline = outline.replace('!!HOURS!!', hours.strip())
     details = None
     if lettercode is not None and numbercode is not None:
+        print('Extracting details for', lettercode, numbercode)
         details = info.loc[(info['Code'] == lettercode) & (info['Number'] == int(numbercode))]
     else:
         error += '\nCourse code specification not found'
@@ -245,7 +248,10 @@ for index, response in data.iterrows():
         optional = optional.replace('. ', '.\n\n')
         optional = f'\\subsection{{Optional Materials}}\n\n{optional}\n'
     outline = outline.replace('!!OPTIONAL!!', ascii(optional))
-    attendance = response[a] # should be a number
+    try:
+        attendance = int(response[a]) # should be a number
+    except:
+        attendance = 0 # zero if blank    
     expl = ascii(response[e])
     if attendance > 0 and len(expl) == 0:
         expl = DEFAULT
