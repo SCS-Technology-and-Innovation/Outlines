@@ -124,6 +124,7 @@ after = forms.loc[a]
 print('Responses from Forms pre-sharepoint', before.shape)
 print('Responses from Forms post-sharepoint', after.shape)
 header = [h.strip() for h in forms.columns.values.tolist()]
+
 t = header.index('Course title')
 n = header.index('Course number')
 s = header.index('Section number')
@@ -131,13 +132,20 @@ i = header.index('Instructor(s)')
 h = header.index('Office hours')
 d = header.index('Course description')
 o = header.index('Learning outcomes')
-req = header.index('Required course material')
-opt = header.index('Optional course material')
+req = header.index('Required readings')
+opt = header.index('Additional optional course material')
 m = header.index('Instructional methods')
 a = header.index('% for Attendance and active participation')
 e = header.index('Explanation for Attendance and active participation')
 g = header.index('Other graded items')
-edited = pd.read_csv('sharepoint.csv', header = [0], engine = 'python') # these have double quotes
+
+# these have double quotes
+edited = pd.read_csv('sharepoint.csv', header = [0], engine = 'python')
+
+
+#for h1, h2 in zip(header, edited.columns):
+#    print(h1, h2,'\n')
+
 print('Responses from Sharepoint', edited.shape)
 edited.columns = before.columns # same header
 data = pd.concat([before, edited, after], axis = 0, ignore_index = True)
