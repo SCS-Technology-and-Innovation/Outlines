@@ -34,7 +34,8 @@ def ascii(text):
                     word = f'\\url{{{word}}}'
             words.append(word)
         clean.append(' '.join(words))
-    return '\n'.join(clean)
+    joint = '\n'.join(clean)
+    return joint.replace('. ', '.\n\n') # paragraphs
 
 def contact(text):
     clean = []
@@ -125,6 +126,34 @@ print('Responses from Forms pre-sharepoint', before.shape)
 print('Responses from Forms post-sharepoint', after.shape)
 header = [h.strip() for h in forms.columns.values.tolist()]
 
+HWMIN = 'Required minimum computer hardware specifications'
+HWREC = 'Recommended computer hardware specifications'
+SWMIN = 'Required software and services'
+SWREC = 'Recommended software and services'
+ADMIN = 'Administrative account'
+IMIN = 'Required minimum internet connection specifications'
+IREC = 'Recommeneded internet connection specifications'
+
+for i in range(len(header)):
+    current = header[i]
+    if 'admin' in current.lower():
+        header[i] = ADMIN
+    elif 'hardware' in current:
+        if 'minimum' in current:
+            header[i] = HWMIN
+        else:
+            header[i] = HWREC
+    elif 'software' in current:
+        if 'required' in current.lower():
+            header[i] = SWMIN
+        else:
+            header[i] = SWREC
+    elif 'internet' in current:
+        if 'minimum' in current:
+            header[i] = IMIN
+        else:
+            header[i] = IREC
+
 t = header.index('Course title')
 n = header.index('Course number')
 s = header.index('Section number')
@@ -132,6 +161,13 @@ i = header.index('Instructor(s)')
 h = header.index('Office hours')
 d = header.index('Course description')
 o = header.index('Learning outcomes')
+hwmin = header.index(HWMIN)
+hwrec = header.index(HWREC)
+swmin = header.index(SWMIN)
+swrec = header.index(SWREC)
+admin = header.index(ADMIN)
+imin = header.index(IMIN)
+irec = header.index(IREC)
 req = header.index('Required readings')
 opt = header.index('Additional optional course material')
 m = header.index('Instructional methods')
@@ -141,7 +177,6 @@ g = header.index('Other graded items')
 
 # these have double quotes
 edited = pd.read_csv('sharepoint.csv', header = [0], engine = 'python')
-
 
 #for h1, h2 in zip(header, edited.columns):
 #    print(h1, h2,'\n')
@@ -214,6 +249,9 @@ for index, response in data.iterrows():
     if details is None or details.empty:
         error += '\nCourse details are not in the domain catalogue, corresponding fields will not be populated\n'
     else:
+        graduate = lettercode[-1] == '2' or numbercode[0] == '6'
+        if graduate:
+            print(lettercode, numbercode, 'is a graduate course')
         prereq = details['Pre-requisites'].iloc[0]
         if pd.isna(prereq):
             outline = outline.replace('!!PREREQ!!', 'None')        
@@ -225,10 +263,26 @@ for index, response in data.iterrows():
         else:
             outline = outline.replace('!!COREQ!!', coreq)
         amount = details['Credit amount'].iloc[0]
+        kind = ''
         if details['Credit type'].iloc[0] == 'credits':
+            if graduate:
+                outline = outline.replace('!!GRADING!!', '\\input{graduate.tex}')
+                kind = 'Graduate-level credit course'
+            else:
+                outline = outline.replace('!!GRADING!!', '\\input{undergraduate.tex}')
+                kind = 'Undergraduate-level credit course'
             outline = outline.replace('!!CREDITS!!', f'{amount} credits')
+            outline = outline.replace('!!TRAINING!!', '\\input{training.tex}')
+            outline = outline.replace('!!FINAL!!', '\\input{minerva.tex}')
+            outline = outline.replace('!!PROFILE!!', '\\input{profilem.tex}')            
         else:
+            kind = 'Non-credit course'
             outline = outline.replace('!!CREDITS!!', f'{amount} CEUs')
+            outline = outline.replace('!!GRADING!!', '\\input{noncredit.tex}')
+            outline = outline.replace('!!TRAINING!!', '')
+            outline = outline.replace('!!FINAL!!', '\\input{athena.tex}')
+            outline = outline.replace('!!PROFILE!!', '\\input{profilea.tex}')                       
+        outline = outline.replace('!!KIND!!', f'{kind}')
         h = details['Contact hours'].iloc[0]
         if pd.isna(h): # credit-side default is 39
             h = 39
@@ -245,15 +299,42 @@ for index, response in data.iterrows():
     if len(method) == 0:
         method = 'Teaching and learning approach is experiential, collaborative, and problem-based'
     outline = outline.replace('!!METHODS!!', method)
+    # hardware
+    thwmin = ascii(response[hwmin])
+    if len(thwmin.strip()) == 0:
+        thwmin = 'No specific computer hardware is required.'
+    thwrec = ascii(response[hwrec])
+    if len(thwrec) > 0:
+        thwrec = '\\subsubsection{Recommended computer hardware}\n\n' + thwrec
+    outline = outline.replace('!!HARDWARE!!', thwmin + thwrec)                
+    # admin 
+    if ascii(response[admin]) == 'yes':
+        outline = outline.replace('!!ADMIN!!', '\\input{admin.tex}')
+    else:
+        outline = outline.replace('!!ADMIN!!', '')
+    # software 
+    tswmin = ascii(response[swmin])
+    if len(tswmin.strip()) == 0:
+        tswmin = 'No specific software, operating system, or online service is required.'    
+    tswrec = ascii(response[swrec])
+    if len(tswrec.strip()) > 0:
+        tswrec = '\\subsubsection{Recommended software and services}\n\n' + tswrec
+    outline = outline.replace('!!SOFTWARE!!', tswmin + tswrec)        
+    # internet
+    timin = ascii(response[imin])
+    if len(timin.strip()) == 0:
+        timin = 'There are no specific requirements regarding the type of internet connection for this course.'        
+    tirec = ascii(response[irec])
+    if len(tirec) > 0:
+        tirec = '\\subsubsection{Recommended internet connection}\n\n' + tirec         
+    outline = outline.replace('!!INTERNET!!', timin + tirec)
+    # READINGS
     required = ascii(response[req])
     if len(required) == 0:
         required = 'Readings and assignments provided through myCourses'
-    else:
-        required = required.replace('. ', '.\n\n')        
-    outline = outline.replace('!!REQUIRED!!', ascii(required))
+    outline = outline.replace('!!READINGS!!', ascii(required))
     optional = ascii(response[opt])
     if len(optional) > 0:
-        optional = optional.replace('. ', '.\n\n')
         optional = f'\\subsection{{Optional Materials}}\n\n{optional}\n'
     outline = outline.replace('!!OPTIONAL!!', ascii(optional))
     try:
