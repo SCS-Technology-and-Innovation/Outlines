@@ -35,6 +35,9 @@ def ascii(text):
             words.append(word)
         clean.append(' '.join(words))
     joint = '\n'.join(clean)
+    joint = joint.replace('#s#', '\n\\begin{itemize}')
+    joint = joint.replace('#i#', '\n\\item ')
+    joint = joint.replace('#e#', '\n\\end{itemize}')
     return joint.replace('. ', '.\n\n') # paragraphs
 
 def contact(text):
