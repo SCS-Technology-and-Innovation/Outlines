@@ -90,10 +90,10 @@ for l in language:
                 areamap[areaname[o]] = areaname[p]
             else:
                 areamap[areaname[p]] = areaname[o]
-        info.add(','.join(f))
+        info.add(f'"{f[0]}","{f[1]}"')
 
 for ae in areamap:
-    info.add(f'{ae},{areamap[ae]}')
+    info.add(f'"{ae}","{areamap[ae]}"')
 
 with open('dictionary.csv', 'w') as target:
     for i in sorted(list(info)):
