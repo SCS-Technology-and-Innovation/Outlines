@@ -5,15 +5,15 @@ from math import fabs
 from datetime import datetime
 from os.path import exists
 
-SHAREPOINT = '15/08/2022 23:55:00'
-CUTOFF = datetime.strptime(SHAREPOINT, '%d/%m/%Y %H:%M:%S')
-
 THRESHOLD = 0.02
 DEFAULT = 'This course consists of a community of learners of which you are an integral member; your active participation is therefore essential to its success. This means: attending class; visiting myCourses, doing the assigned readings/exercises before class; and engaging in class discussions/activities.'
 
 wrong = set()
 
 def ascii(text):
+    text = text.replace('#s#', '\n\\begin{itemize}')
+    text = text.replace('#i#', '\n\\item ')
+    text = text.replace('#e#', '\n\\end{itemize}')
     if '&' in text and '\\&' not in text:
         text = text.replace('&', '\\&') # LaTeX not accounted for
     if '%' in text and '\\%' not in text:
@@ -35,9 +35,6 @@ def ascii(text):
             words.append(word)
         clean.append(' '.join(words))
     joint = '\n'.join(clean)
-    joint = joint.replace('#s#', '\n\\begin{itemize}')
-    joint = joint.replace('#i#', '\n\\item ')
-    joint = joint.replace('#e#', '\n\\end{itemize}')
     return joint.replace('. ', '.\n\n') # paragraphs
 
 def contact(text):
@@ -110,24 +107,12 @@ allbymyself = '' # no TA, no CA (say nothing for now)
 # load the template
 with open('outline.tex') as source:
     template = source.read()
-template = template.replace('!!TERM!!', 'Fall 2022') # update the term/year
+template = template.replace('!!TERM!!', 'Winter 2023') # update the term/year
     
 # load the outline responses
 responses = pd.ExcelFile('outline.xlsx')
-forms  = responses.parse(responses.sheet_names[0])
-
-completion= pd.to_datetime(forms.iloc[:, 2], format = '%m-%d%-y %H:%M:%S')
-b = completion < CUTOFF
-a = completion >= CUTOFF
-# drop the first five columns
-forms = forms.iloc[: , 5:]
-# split into two for the people who do not read teams
-before = forms.loc[b]
-after = forms.loc[a]
-
-print('Responses from Forms pre-sharepoint', before.shape)
-print('Responses from Forms post-sharepoint', after.shape)
-header = [h.strip() for h in forms.columns.values.tolist()]
+data  = responses.parse(responses.sheet_names[0])
+header = [h.strip() for h in data.columns.values.tolist()]
 
 HWMIN = 'Required minimum computer hardware specifications'
 HWREC = 'Recommended computer hardware specifications'
@@ -135,7 +120,7 @@ SWMIN = 'Required software and services'
 SWREC = 'Recommended software and services'
 ADMIN = 'Administrative account'
 IMIN = 'Required minimum internet connection specifications'
-IREC = 'Recommeneded internet connection specifications'
+IREC = 'Recommended internet connection specifications'
 
 for i in range(len(header)):
     current = header[i]
@@ -177,17 +162,9 @@ m = header.index('Instructional methods')
 a = header.index('% for Attendance and active participation')
 e = header.index('Explanation for Attendance and active participation')
 g = header.index('Other graded items')
+adinfo = header.index('Additional information')
 
-# these have double quotes
-edited = pd.read_csv('sharepoint.csv', header = [0], engine = 'python')
-
-#for h1, h2 in zip(header, edited.columns):
-#    print(h1, h2,'\n')
-
-print('Responses from Sharepoint', edited.shape)
-edited.columns = before.columns # same header
-data = pd.concat([before, edited, after], axis = 0, ignore_index = True)
-print('Combined responses', data.shape)
+print('Responses', data.shape)
 data.fillna('', inplace = True)
 
 fields = dict()
@@ -230,6 +207,9 @@ for index, response in data.iterrows():
     section = str(section)
     while len(section) < 3:
         section = '0' + section
+    if len(code) != 7:
+        print(f'Wrong code length, skipping {code} {section}')
+        continue
     output = f'{code}-{section}.tex'
     if exists(output):
         print('Reprocessing', output)
@@ -335,11 +315,19 @@ for index, response in data.iterrows():
     required = ascii(response[req])
     if len(required) == 0:
         required = 'Readings and assignments provided through myCourses'
-    outline = outline.replace('!!READINGS!!', ascii(required))
+    outline = outline.replace('!!READINGS!!', required)
     optional = ascii(response[opt])
     if len(optional) > 0:
         optional = f'\\subsection{{Optional Materials}}\n\n{optional}\n'
-    outline = outline.replace('!!OPTIONAL!!', ascii(optional))
+    outline = outline.replace('!!OPTIONAL!!', optional)
+
+    # ADDITIONAL INFO
+    ai = ascii(response[adinfo])
+    if len(ai) > 0:
+        aic = f'\\section{{Additional Course Details}}\n\n{ai}\n'
+        outline = outline.replace('!!ADDITIONAL!!', aic)
+    else:
+        outline = outline.replace('!!ADDITIONAL!!', '') # blank        
     try:
         attendance = int(response[a]) # should be a number
     except:
