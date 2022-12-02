@@ -5,15 +5,15 @@ from math import fabs
 from datetime import datetime
 from os.path import exists
 
-SHAREPOINT = '15/08/2022 23:55:00'
-CUTOFF = datetime.strptime(SHAREPOINT, '%d/%m/%Y %H:%M:%S')
-
 THRESHOLD = 0.02
 DEFAULT = 'This course consists of a community of learners of which you are an integral member; your active participation is therefore essential to its success. This means: attending class; visiting myCourses, doing the assigned readings/exercises before class; and engaging in class discussions/activities.'
 
 wrong = set()
 
 def ascii(text):
+    text = text.replace('#s#', '\n\\begin{itemize}')
+    text = text.replace('#i#', '\n\\item ')
+    text = text.replace('#e#', '\n\\end{itemize}')
     if '&' in text and '\\&' not in text:
         text = text.replace('&', '\\&') # LaTeX not accounted for
     if '%' in text and '\\%' not in text:
@@ -35,9 +35,6 @@ def ascii(text):
             words.append(word)
         clean.append(' '.join(words))
     joint = '\n'.join(clean)
-    joint = joint.replace('#s#', '\n\\begin{itemize}')
-    joint = joint.replace('#i#', '\n\\item ')
-    joint = joint.replace('#e#', '\n\\end{itemize}')
     return joint.replace('. ', '.\n\n') # paragraphs
 
 def contact(text):
@@ -75,59 +72,48 @@ def group(line):
 
 # load the course information sheet
 info = pd.read_csv('courses.csv')
+TAsheet = { 'Fall 2022': 'TAs_fall_2022' }
 
 # load the TA information
-TAinfo = pd.ExcelFile('Teaching_Assistants.xlsx')
-TAs  = TAinfo.parse(TAinfo.sheet_names[0])
-TAh = [h.strip() for h in TAs.columns.values.tolist()]
-tacl = TAh.index('Course')
-tacn = TAh.index('Code')
-tas = TAh.index('Section')
-tat = TAh.index('Teaching/Course Assistant')
-tan = TAh.index('Candidate')
-
 assistant = dict()
-for index, row in TAs.iterrows():
-    name = row[tan]
-    if not  isinstance(name, str):
-        break
-    name = name.lstrip().strip()
-    code = row[tacl].strip()
-    number = row[tacn]
-    section = row[tas]
-    kind = row[tat]
-    if 'TA 120' in name:
-        name = name.replace('TA 120', '')
-    if 'low registration' in name:
-        continue
-    details = f'\item[Assistant ({kind})]{{{name}}}'
-    number = '{:03d}'.format(number)
-    print(code, number, section, details)
-    assistant[f'{code} {number} {section}'] = details
+TAinfo = pd.ExcelFile('Teaching_Assistants.xlsx')
+for term in TAsheet:
+    TAs  = TAinfo.parse(TAsheet[term])
+    TAh = [h.strip() for h in TAs.columns.values.tolist()]
+    tacl = TAh.index('Course')
+    tacn = TAh.index('Code')
+    tas = TAh.index('Section')
+    tat = TAh.index('Teaching/Course Assistant')
+    tan = TAh.index('Candidate')
+    for index, row in TAs.iterrows():
+        name = row[tan]
+        if not  isinstance(name, str):
+            break
+        name = name.lstrip().strip()
+        code = row[tacl].strip()
+        number = row[tacn]
+        section = row[tas]
+        kind = row[tat]
+        if 'TA 120' in name:
+            name = name.replace('TA 120', '')
+        if 'low registration' in name:
+            continue
+        details = f'\item[Assistant ({kind})]{{{name}}}'
+        number = '{:03d}'.format(number)
+        number = '{:03d}'.format(section)
+        # print(code, number, section, details)
+        assistant[f'{term} {code} {number} {section}'] = details
 
 allbymyself = '' # no TA, no CA (say nothing for now)
     
 # load the template
 with open('outline.tex') as source:
     template = source.read()
-template = template.replace('!!TERM!!', 'Fall 2022') # update the term/year
     
 # load the outline responses
 responses = pd.ExcelFile('outline.xlsx')
-forms  = responses.parse(responses.sheet_names[0])
-
-completion= pd.to_datetime(forms.iloc[:, 2], format = '%m-%d%-y %H:%M:%S')
-b = completion < CUTOFF
-a = completion >= CUTOFF
-# drop the first five columns
-forms = forms.iloc[: , 5:]
-# split into two for the people who do not read teams
-before = forms.loc[b]
-after = forms.loc[a]
-
-print('Responses from Forms pre-sharepoint', before.shape)
-print('Responses from Forms post-sharepoint', after.shape)
-header = [h.strip() for h in forms.columns.values.tolist()]
+data  = responses.parse(responses.sheet_names[0])
+header = [h.strip() for h in data.columns.values.tolist()]
 
 HWMIN = 'Required minimum computer hardware specifications'
 HWREC = 'Recommended computer hardware specifications'
@@ -135,7 +121,7 @@ SWMIN = 'Required software and services'
 SWREC = 'Recommended software and services'
 ADMIN = 'Administrative account'
 IMIN = 'Required minimum internet connection specifications'
-IREC = 'Recommeneded internet connection specifications'
+IREC = 'Recommended internet connection specifications'
 
 for i in range(len(header)):
     current = header[i]
@@ -157,6 +143,7 @@ for i in range(len(header)):
         else:
             header[i] = IREC
 
+when = header.index('Term')
 t = header.index('Course title')
 n = header.index('Course number')
 s = header.index('Section number')
@@ -177,23 +164,19 @@ m = header.index('Instructional methods')
 a = header.index('% for Attendance and active participation')
 e = header.index('Explanation for Attendance and active participation')
 g = header.index('Other graded items')
+adinfo = header.index('Additional information')
 
-# these have double quotes
-edited = pd.read_csv('sharepoint.csv', header = [0], engine = 'python')
-
-#for h1, h2 in zip(header, edited.columns):
-#    print(h1, h2,'\n')
-
-print('Responses from Sharepoint', edited.shape)
-edited.columns = before.columns # same header
-data = pd.concat([before, edited, after], axis = 0, ignore_index = True)
-print('Combined responses', data.shape)
+print('Responses', data.shape)
 data.fillna('', inplace = True)
 
 fields = dict()
 
 for index, response in data.iterrows():
     error = ''
+    term = response[when].strip() # when is this taught
+    if term == '':
+        term = 'Fall 2022' # default since we did not ask for the term in the start
+    shortterm = term[0] + term[-2:]
     code = response[n].strip() # course number
     if len(code) < 3:
         print('Skipping an empty row')
@@ -222,15 +205,19 @@ for index, response in data.iterrows():
     else:
         lettercode = code[:3]
         numbercode = code[4:]
-    outline = template.replace('!!CODE!!', code)
+    outline = template.replace('!!TERM!!', term) 
+    outline = outline.replace('!!CODE!!', code)
     outline = outline.replace('!!SECTION!!', section)
     print('Retrieving CA/TA for', code, section)
-    outline = outline.replace('!!ASSISTANT!!', assistant.get(f'{code} {section}', allbymyself))
+    outline = outline.replace('!!ASSISTANT!!', assistant.get(f'{term} {code} {section}', allbymyself))
     code = code.replace(' ', '') # no spaces in the filename
     section = str(section)
     while len(section) < 3:
         section = '0' + section
-    output = f'{code}-{section}.tex'
+    if len(code) != 7:
+        print(f'Wrong code length, skipping {code} {section}')
+        continue
+    output = f'{shortterm}-{code}-{section}.tex'
     if exists(output):
         print('Reprocessing', output)
     else:
@@ -252,7 +239,7 @@ for index, response in data.iterrows():
     if details is None or details.empty:
         error += '\nCourse details are not in the domain catalogue, corresponding fields will not be populated\n'
     else:
-        graduate = lettercode[-1] == '2' or numbercode[0] == '6'
+        graduate = lettercode[-1] == '2' or numbercode[0] == '6' or numbercode[0] == '5'
         if graduate:
             print(lettercode, numbercode, 'is a graduate course')
         prereq = details['Pre-requisites'].iloc[0]
@@ -335,11 +322,19 @@ for index, response in data.iterrows():
     required = ascii(response[req])
     if len(required) == 0:
         required = 'Readings and assignments provided through myCourses'
-    outline = outline.replace('!!READINGS!!', ascii(required))
+    outline = outline.replace('!!READINGS!!', required)
     optional = ascii(response[opt])
     if len(optional) > 0:
         optional = f'\\subsection{{Optional Materials}}\n\n{optional}\n'
-    outline = outline.replace('!!OPTIONAL!!', ascii(optional))
+    outline = outline.replace('!!OPTIONAL!!', optional)
+
+    # ADDITIONAL INFO
+    ai = ascii(response[adinfo])
+    if len(ai) > 0:
+        aic = f'\\section{{Additional Course Details}}\n\n{ai}\n'
+        outline = outline.replace('!!ADDITIONAL!!', aic)
+    else:
+        outline = outline.replace('!!ADDITIONAL!!', '') # blank        
     try:
         attendance = int(response[a]) # should be a number
     except:

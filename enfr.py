@@ -93,10 +93,8 @@ for l in language:
             else:
                 areamap[areaname[p]] = areaname[o]
 
-
 for ae in areamap:
-    f = [ae, areamap[ae]]
-    info.add('###'.join(f))
+    info.add(f'"{ae}","{areamap[ae]}"')
 
 import csv
 with open('dictionary.csv', 'w', newline = '\n') as target:
