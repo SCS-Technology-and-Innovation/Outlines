@@ -72,42 +72,43 @@ def group(line):
 
 # load the course information sheet
 info = pd.read_csv('courses.csv')
+TAsheet = { 'Fall 2022': 'TAs_fall_2022' }
 
 # load the TA information
-TAinfo = pd.ExcelFile('Teaching_Assistants.xlsx')
-TAs  = TAinfo.parse(TAinfo.sheet_names[0])
-TAh = [h.strip() for h in TAs.columns.values.tolist()]
-tacl = TAh.index('Course')
-tacn = TAh.index('Code')
-tas = TAh.index('Section')
-tat = TAh.index('Teaching/Course Assistant')
-tan = TAh.index('Candidate')
-
 assistant = dict()
-for index, row in TAs.iterrows():
-    name = row[tan]
-    if not  isinstance(name, str):
-        break
-    name = name.lstrip().strip()
-    code = row[tacl].strip()
-    number = row[tacn]
-    section = row[tas]
-    kind = row[tat]
-    if 'TA 120' in name:
-        name = name.replace('TA 120', '')
-    if 'low registration' in name:
-        continue
-    details = f'\item[Assistant ({kind})]{{{name}}}'
-    number = '{:03d}'.format(number)
-    print(code, number, section, details)
-    assistant[f'{code} {number} {section}'] = details
+TAinfo = pd.ExcelFile('Teaching_Assistants.xlsx')
+for term in TAsheet:
+    TAs  = TAinfo.parse(TAsheet[term])
+    TAh = [h.strip() for h in TAs.columns.values.tolist()]
+    tacl = TAh.index('Course')
+    tacn = TAh.index('Code')
+    tas = TAh.index('Section')
+    tat = TAh.index('Teaching/Course Assistant')
+    tan = TAh.index('Candidate')
+    for index, row in TAs.iterrows():
+        name = row[tan]
+        if not  isinstance(name, str):
+            break
+        name = name.lstrip().strip()
+        code = row[tacl].strip()
+        number = row[tacn]
+        section = row[tas]
+        kind = row[tat]
+        if 'TA 120' in name:
+            name = name.replace('TA 120', '')
+        if 'low registration' in name:
+            continue
+        details = f'\item[Assistant ({kind})]{{{name}}}'
+        number = '{:03d}'.format(number)
+        number = '{:03d}'.format(section)
+        # print(code, number, section, details)
+        assistant[f'{term} {code} {number} {section}'] = details
 
 allbymyself = '' # no TA, no CA (say nothing for now)
     
 # load the template
 with open('outline.tex') as source:
     template = source.read()
-template = template.replace('!!TERM!!', 'Winter 2023') # update the term/year
     
 # load the outline responses
 responses = pd.ExcelFile('outline.xlsx')
@@ -142,6 +143,7 @@ for i in range(len(header)):
         else:
             header[i] = IREC
 
+when = header.index('Term')
 t = header.index('Course title')
 n = header.index('Course number')
 s = header.index('Section number')
@@ -171,6 +173,10 @@ fields = dict()
 
 for index, response in data.iterrows():
     error = ''
+    term = response[when].strip() # when is this taught
+    if term == '':
+        term = 'Fall 2022' # default since we did not ask for the term in the start
+    shortterm = term[0] + term[-2:]
     code = response[n].strip() # course number
     if len(code) < 3:
         print('Skipping an empty row')
@@ -199,10 +205,11 @@ for index, response in data.iterrows():
     else:
         lettercode = code[:3]
         numbercode = code[4:]
-    outline = template.replace('!!CODE!!', code)
+    outline = template.replace('!!TERM!!', term) 
+    outline = outline.replace('!!CODE!!', code)
     outline = outline.replace('!!SECTION!!', section)
     print('Retrieving CA/TA for', code, section)
-    outline = outline.replace('!!ASSISTANT!!', assistant.get(f'{code} {section}', allbymyself))
+    outline = outline.replace('!!ASSISTANT!!', assistant.get(f'{term} {code} {section}', allbymyself))
     code = code.replace(' ', '') # no spaces in the filename
     section = str(section)
     while len(section) < 3:
@@ -210,7 +217,7 @@ for index, response in data.iterrows():
     if len(code) != 7:
         print(f'Wrong code length, skipping {code} {section}')
         continue
-    output = f'{code}-{section}.tex'
+    output = f'{shortterm}-{code}-{section}.tex'
     if exists(output):
         print('Reprocessing', output)
     else:
@@ -232,7 +239,7 @@ for index, response in data.iterrows():
     if details is None or details.empty:
         error += '\nCourse details are not in the domain catalogue, corresponding fields will not be populated\n'
     else:
-        graduate = lettercode[-1] == '2' or numbercode[0] == '6'
+        graduate = lettercode[-1] == '2' or numbercode[0] == '6' or numbercode[0] == '5'
         if graduate:
             print(lettercode, numbercode, 'is a graduate course')
         prereq = details['Pre-requisites'].iloc[0]
