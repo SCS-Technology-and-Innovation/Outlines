@@ -348,7 +348,7 @@ for index, response in data.iterrows():
     total = float(attendance)
     for entries in group(response[g]):
         if len(entries) >= 2:
-            perc = entries[0]
+            perc = entries[0].replace('\%', '')
             contrib = 0
             value = 0
             try:
