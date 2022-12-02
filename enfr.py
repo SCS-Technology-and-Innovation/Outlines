@@ -53,6 +53,7 @@ for af in aos:
                         pn = pd.string
                         if pn is None:
                             continue
+                        pn = pn.strip()
                         programname[purl] = pn.strip()
                         areaname[purl] = name
                         if af == 'en':
@@ -85,19 +86,25 @@ for l in language:
         f = [ programname.get(p, NA), programname.get(o, NA) ]
         if l == 'fr':
             f = f[::-1] # reverse
+        info.add('###'.join(f))            
         if p in areaname and o in areaname:
             if l == 'fr':
                 areamap[areaname[o]] = areaname[p]
             else:
                 areamap[areaname[p]] = areaname[o]
-        info.add(','.join(f))
+
 
 for ae in areamap:
-    info.add(f'{ae},{areamap[ae]}')
+    f = [ae, areamap[ae]]
+    info.add('###'.join(f))
 
-with open('dictionary.csv', 'w') as target:
+import csv
+with open('dictionary.csv', 'w', newline = '\n') as target:
+    writer = csv.writer(target, delimiter=',')
     for i in sorted(list(info)):
-        print(i, file = target)
+        writer.writerow([d for d in i.split('###')])
+
+
             
             
             
