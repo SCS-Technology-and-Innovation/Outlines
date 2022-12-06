@@ -5,12 +5,15 @@ from math import fabs
 from datetime import datetime
 from os.path import exists
 
-THRESHOLD = 0.02
+skip = False
+debug = False
+THRESHOLD = 0.05
 DEFAULT = 'This course consists of a community of learners of which you are an integral member; your active participation is therefore essential to its success. This means: attending class; visiting myCourses, doing the assigned readings/exercises before class; and engaging in class discussions/activities.'
 
 wrong = set()
 
 def ascii(text):
+    text = text.replace('%23', '#') # sharepoint export breaks the #    
     text = text.replace('#s#', '\n\\begin{itemize}')
     text = text.replace('#i#', '\n\\item ')
     text = text.replace('#e#', '\n\\end{itemize}')
@@ -111,19 +114,46 @@ with open('outline.tex') as source:
     template = source.read()
     
 # load the outline responses
-responses = pd.ExcelFile('outline.xlsx')
-data  = responses.parse(responses.sheet_names[0])
-header = [h.strip() for h in data.columns.values.tolist()]
+data = None
+from sys import argv
+fixed = None
+if 'sharepoint' not in argv:
+    responses = pd.ExcelFile('outline.xlsx')
+    data  = responses.parse(responses.sheet_names[0])
+else:
+    data = pd.read_csv('sharepoint.csv', header = [0], engine = 'python')
+    fixed = 'Winter 2023'
 
-HWMIN = 'Required minimum computer hardware specifications'
-HWREC = 'Recommended computer hardware specifications'
-SWMIN = 'Required software and services'
-SWREC = 'Recommended software and services'
-ADMIN = 'Administrative account'
-IMIN = 'Required minimum internet connection specifications'
-IREC = 'Recommended internet connection specifications'
+header = [h.strip().lower() for h in data.columns.values.tolist()]
+HWMIN = 'required minimum computer hardware specifications'
+HWREC = 'recommended computer hardware specifications'
+SWMIN = 'required software and services'
+SWREC = 'recommended software and services'
+ADMIN = 'administrative account'
+IMIN = 'required minimum internet connection specifications'
+IREC = 'recommended internet connection specifications'
 
-for i in range(len(header)):
+if fixed is None:            
+    when = header.index('term')
+    
+t = header.index('course title')
+n = header.index('course number')
+s = header.index('section number')
+prof = header.index('instructor(s)')
+h = header.index('office hours')
+d = header.index('course description')
+o = header.index('learning outcomes')
+req = header.index('required readings')
+opt = header.index('additional optional course material')
+m = header.index('instructional methods')
+a = header.index('% for attendance and active participation')
+e = header.index('explanation for attendance and active participation')
+graded = header.index('other graded items')
+adinfo = header.index('additional information')
+
+hl = len(header)
+
+for i in range(hl):
     current = header[i]
     if 'admin' in current.lower():
         header[i] = ADMIN
@@ -143,14 +173,6 @@ for i in range(len(header)):
         else:
             header[i] = IREC
 
-when = header.index('Term')
-t = header.index('Course title')
-n = header.index('Course number')
-s = header.index('Section number')
-i = header.index('Instructor(s)')
-h = header.index('Office hours')
-d = header.index('Course description')
-o = header.index('Learning outcomes')
 hwmin = header.index(HWMIN)
 hwrec = header.index(HWREC)
 swmin = header.index(SWMIN)
@@ -158,13 +180,6 @@ swrec = header.index(SWREC)
 admin = header.index(ADMIN)
 imin = header.index(IMIN)
 irec = header.index(IREC)
-req = header.index('Required readings')
-opt = header.index('Additional optional course material')
-m = header.index('Instructional methods')
-a = header.index('% for Attendance and active participation')
-e = header.index('Explanation for Attendance and active participation')
-g = header.index('Other graded items')
-adinfo = header.index('Additional information')
 
 print('Responses', data.shape)
 data.fillna('', inplace = True)
@@ -172,8 +187,11 @@ data.fillna('', inplace = True)
 fields = dict()
 
 for index, response in data.iterrows():
+    lr = len(response)
+    assert lr == hl # multiline bug detection 
     error = ''
-    term = response[when].strip() # when is this taught
+    # when is this taught
+    term = fixed if fixed is not None else response[when].strip() 
     if term == '':
         term = 'Fall 2022' # default since we did not ask for the term in the start
     shortterm = term[0] + term[-2:]
@@ -225,7 +243,7 @@ for index, response in data.iterrows():
     outline = outline.replace('!!NAME!!', ascii(response[t])) # course title
     outline = outline.replace('!!CODE!!', code)
     outline = outline.replace('!!SECTION!!', section)
-    outline = outline.replace('!!INSTRUCTOR!!', contact(response[i].strip())) # instructor
+    outline = outline.replace('!!INSTRUCTOR!!', contact(response[prof].strip())) # instructor
     hours = response.get(h, '')
     if len(hours) == 0:
         hours = 'Upon request'
@@ -285,7 +303,7 @@ for index, response in data.iterrows():
                                       f'\\item[Independent study hours]{{Approximately {h} hours }}')
     outline = outline.replace('!!DESCRIPTION!!', ascii(response[d]))
     outline = outline.replace('!!OUTCOMES!!', ascii(response[o]))
-    method = ascii(response[m])
+    method = ascii(str(response[m]))
     if len(method) == 0:
         method = 'Teaching and learning approach is experiential, collaborative, and problem-based'
     outline = outline.replace('!!METHODS!!', method)
@@ -319,11 +337,11 @@ for index, response in data.iterrows():
         tirec = '\\subsubsection{Recommended internet connection}\n\n' + tirec         
     outline = outline.replace('!!INTERNET!!', timin + tirec)
     # READINGS
-    required = ascii(response[req])
+    required = ascii(str(response[req]))
     if len(required) == 0:
         required = 'Readings and assignments provided through myCourses'
     outline = outline.replace('!!READINGS!!', required)
-    optional = ascii(response[opt])
+    optional = ascii(str(response[opt]))
     if len(optional) > 0:
         optional = f'\\subsection{{Optional Materials}}\n\n{optional}\n'
     outline = outline.replace('!!OPTIONAL!!', optional)
@@ -342,11 +360,21 @@ for index, response in data.iterrows():
     expl = ascii(response[e])
     if attendance > 0 and len(expl) == 0:
         expl = DEFAULT
-    graded = [ (attendance,
+    assessments = [ (attendance,
                 'Attendance and active participation',
                 'See myCourses for more information', expl )]
     total = float(attendance)
-    for entries in group(response[g]):
+    items = response[graded]
+    if debug:
+        idx = 0
+        for r in response:
+            rs = str(r)
+            if len(rs) > 10:
+                rs = rs[:10]
+            print(idx, header[idx], '\n  ', rs, '\n')
+            idx += 1
+        print('###', items)
+    for entries in group(items):
         if len(entries) >= 2:
             perc = entries[0].replace('\%', '')
             contrib = 0
@@ -359,22 +387,22 @@ for index, response in data.iterrows():
             name = entries[1]
             due = entries[2] if len(entries) > 2 else 'To be defined'
             detail = ascii(entries[3]) if len(entries) > 3 else 'To be made available on myCourses'
-            graded.append( (perc, name, due, detail) )
+            assessments.append( (perc, name, due, detail) )
     if fabs(total - 100) > THRESHOLD:
-        error = f'Parsing identified {total} percent for the grade instead of 100 percent.'
-    items = '\\\\\n\\hline\n'.join([ f'{ip} & {it} & {idl} & {idesc}' for (ip, it, idl, idesc) in graded ])
+        error = f'\nParsing identified {total} percent for the grade instead of 100 percent.'
+    items = '\\\\\n\\hline\n'.join([ f'{ip} & {it} & {idl} & {idesc}' for (ip, it, idl, idesc) in assessments ])
     outline = outline.replace('!!ITEMS!!', items)
-    sessions = [ ascii(response[header.index(f'Session {k}')]) for k in range(1, 14) ]
+    sessions = [ ascii(response[header.index(f'session {k}')]) for k in range(1, 14) ]
     content = '\n'.join([ f'\\item{{{ascii(r)}}}' if len(r) > 0 else '' for r in sessions ])
     outline = outline.replace('\\item{!!CONTENT!!}', ascii(content))
     outline = outline.replace('!!INFO!!', '\\textcolor{blue}{Complementary information to be inserted soon.}')    
     if len(error) > 0:
         error = f'\\textcolor{{red}}{{{error}}}'
-        if output not in wrong and exists(output):
+        if skip and output not in wrong and exists(output):
             print('Omitting a broken version for', output, 'since an error-free one exists')
             continue
         wrong.add(output)
-        print('Storing a version of', output, 'that contains errors:, error')
+        print('Storing a version of', output, 'that contains errors:', error)
     else:
         if output in wrong:
             wrong.remove(output)
