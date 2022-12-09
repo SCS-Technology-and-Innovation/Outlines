@@ -255,14 +255,16 @@ for listing in locations:
                         else:
                             ch = [ 'hours of classroom instruction',
                                    'hours in class', 'hours class', 
-                                   'hours of in-class instruction', 'contact hours']
+                                   'hours of in-class instruction', 'contact hours',
+                                   'hours of lectures']
                             for s in ch:
                                 if s in profile:
                                     i = profile.index(s)
                                     cv = int(profile[(i - 3):i])
                                     break
                         ah = [ 'hours of assignments', 
-                               'hours of course readings and assignments' ]
+                               'hours of course readings and assignments',
+                               'hours of independent study']
                         for s in ah:
                             if s in profile:
                                 i = profile.index(s)

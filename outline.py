@@ -248,31 +248,32 @@ for index, response in data.iterrows():
     if len(hours) == 0:
         hours = 'Upon request'
     outline = outline.replace('!!HOURS!!', hours.strip())
-    details = None
+    additionalDetails = None
     if lettercode is not None and numbercode is not None:
-        print('Extracting details for', lettercode, numbercode)
-        details = info.loc[(info['Code'] == lettercode) & (info['Number'] == int(numbercode))]
+        print('Extracting additional details for', lettercode, numbercode)
+        additionalDetails = info.loc[(info['Code'] == lettercode) & (info['Number'] == int(numbercode))]
     else:
         error += '\nCourse code specification not found'
-    if details is None or details.empty:
-        error += '\nCourse details are not in the domain catalogue, corresponding fields will not be populated\n'
+    if additionalDetails is None or additionalDetails.empty:
+        error += '\nCourse details not in the domain catalogue, corresponding fields will not be populated\n'
     else:
         graduate = lettercode[-1] == '2' or numbercode[0] == '6' or numbercode[0] == '5'
         if graduate:
             print(lettercode, numbercode, 'is a graduate course')
-        prereq = details['Pre-requisites'].iloc[0]
+        prereq = additionalDetails['Pre-requisites'].iloc[0]
         if pd.isna(prereq):
-            outline = outline.replace('!!PREREQ!!', 'None')        
+            outline = outline.replace('!!PREREQ!!', 'No pre-requisites')        
         else:
             outline = outline.replace('!!PREREQ!!', prereq)
-        coreq = details['Co-requisites'].iloc[0]
+        coreq = additionalDetails['Co-requisites'].iloc[0]
         if pd.isna(coreq):
-            outline = outline.replace('!!COREQ!!', 'None')
+            outline = outline.replace('!!COREQ!!', 'No co-requisites')
         else:
             outline = outline.replace('!!COREQ!!', coreq)
-        amount = details['Credit amount'].iloc[0]
+        amount = additionalDetails['Credit amount'].iloc[0]
+        amount = round(int(amount)) # no .0
         kind = ''
-        if details['Credit type'].iloc[0] == 'credits':
+        if additionalDetails['Credit type'].iloc[0] == 'credits':
             if graduate:
                 outline = outline.replace('!!GRADING!!', '\\input{graduate.tex}')
                 kind = 'Graduate-level credit course'
@@ -291,14 +292,17 @@ for index, response in data.iterrows():
             outline = outline.replace('!!FINAL!!', '\\input{athena.tex}')
             outline = outline.replace('!!PROFILE!!', '\\input{profilea.tex}')                       
         outline = outline.replace('!!KIND!!', f'{kind}')
-        h = details['Contact hours'].iloc[0]
+        h = additionalDetails['Contact hours'].iloc[0]
         if pd.isna(h): # credit-side default is 39
             h = 39
+        else:
+            h = round(int(h)) # no .0
         outline = outline.replace('!!CONTACT!!', f'{h} hours')
-        h = details['Approximate assignment hours'].iloc[0]
-        if pd.isna(h):
+        h = additionalDetails['Approximate assignment hours'].iloc[0]
+        if h is None or h == 'None' or pd.isna(h):
             outline = outline.replace('!!ASSIGNMENT!!','') # nothing goes here
         else:
+            h = round(int(h)) # no .0
             outline = outline.replace('!!ASSIGNMENT!!',
                                       f'\\item[Independent study hours]{{Approximately {h} hours }}')
     outline = outline.replace('!!DESCRIPTION!!', ascii(response[d]))
