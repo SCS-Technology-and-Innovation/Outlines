@@ -54,7 +54,7 @@ def contact(text):
         text = text.replace('. ', '.\\ ') 
     for word in text.split():
         if '@' in word:
-            link = f'\\href{{mailto:{word}}}{{{word}}}' 
+            link = f'\\href{{mailto:{word}}}{{{word}}} \\\\ ' 
             clean.append(link)
         else:
             clean.append(word)
@@ -103,7 +103,7 @@ for term in TAsheet:
             continue
         details = f'\item[Assistant ({kind})]{{{name}}}'
         number = '{:03d}'.format(number)
-        number = '{:03d}'.format(section)
+        section = '{:03d}'.format(section)
         # print(code, number, section, details)
         assistant[f'{term} {code} {number} {section}'] = details
 
@@ -199,7 +199,7 @@ for index, response in data.iterrows():
     if len(code) < 3:
         print('Skipping an empty row')
         continue
-    section = str(response[s]).strip() # course section 
+    section = str(response[s]).strip() # course section
     if len(section) == 0 and '-' in code:
         parts = code.split('-')
         code = parts[0].strip()
@@ -225,6 +225,7 @@ for index, response in data.iterrows():
         numbercode = code[4:]
     outline = template.replace('!!TERM!!', term) 
     outline = outline.replace('!!CODE!!', code)
+    section = '{:03d}'.format(int(section))    
     outline = outline.replace('!!SECTION!!', section)
     print('Retrieving CA/TA for', code, section)
     outline = outline.replace('!!ASSISTANT!!', assistant.get(f'{term} {code} {section}', allbymyself))
@@ -293,7 +294,7 @@ for index, response in data.iterrows():
             outline = outline.replace('!!PROFILE!!', '\\input{profilea.tex}')                       
         outline = outline.replace('!!KIND!!', f'{kind}')
         h = additionalDetails['Contact hours'].iloc[0]
-        if pd.isna(h): # credit-side default is 39
+        if h is None or h == 'None' or pd.isna(h): # credit-side default is 39
             h = 39
         else:
             h = round(int(h)) # no .0
