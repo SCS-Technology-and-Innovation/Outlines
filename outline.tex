@@ -4,6 +4,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{fancyhdr}
 \usepackage{xcolor}
+\usepackage{array}
 \usepackage{helvet}
 \usepackage{setspace}
 \usepackage{graphicx}
@@ -101,11 +102,14 @@ exclusive of weekends and statutory holidays.
 \label{eval}
 
 \begin{center}
-\scalebox{0.8}{
-  \begin{tabular}{p{15mm}|p{30mm}|p{30mm}|p{100mm}}
-    \% & Item & Deadline & Description \\
+  \renewcommand{\arraystretch}{1.2}
+\scalebox{0.9}{
+  \begin{tabular}{|r|>{\raggedright}p{40mm}|>{\raggedright}p{30mm}|p{100mm}|}
     \hline
-  !!ITEMS!!
+    {\bf \%} & {\bf Item} & {\bf Deadline} & {\bf Description} \\
+    \hline
+    !!ITEMS!! \\
+    \hline
 \end{tabular}}
 \end{center}
 

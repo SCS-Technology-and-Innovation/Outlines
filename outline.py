@@ -365,9 +365,11 @@ for index, response in data.iterrows():
     expl = ascii(response[e])
     if attendance > 0 and len(expl) == 0:
         expl = DEFAULT
-    assessments = [ (attendance,
-                'Attendance and active participation',
-                'See myCourses for more information', expl )]
+    assessments = []
+    if attendance > 0:
+        assessments.append((attendance,
+                            'Attendance and active participation',
+                            'See myCourses for more information', expl ))
     total = float(attendance)
     items = response[graded]
     if debug:
@@ -388,11 +390,12 @@ for index, response in data.iterrows():
                 value = float(perc)
             except:
                 pass
-            total += value
-            name = entries[1]
-            due = entries[2] if len(entries) > 2 else 'To be defined'
-            detail = ascii(entries[3]) if len(entries) > 3 else 'To be made available on myCourses'
-            assessments.append( (perc, name, due, detail) )
+            if value > 0:
+                total += value
+                name = entries[1]
+                due = entries[2] if len(entries) > 2 else 'To be defined'
+                detail = ascii(entries[3]) if len(entries) > 3 else 'To be made available on myCourses'
+                assessments.append( (perc, name, due, detail) )
     if fabs(total - 100) > THRESHOLD:
         error = f'\nParsing identified {total} percent for the grade instead of 100 percent.'
     items = '\\\\\n\\hline\n'.join([ f'{ip} & {it} & {idl} & {idesc}' for (ip, it, idl, idesc) in assessments ])
