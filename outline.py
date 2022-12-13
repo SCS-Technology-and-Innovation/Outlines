@@ -61,6 +61,9 @@ def contact(text):
     return ' '.join(clean)
 
 def group(line):
+    line = line.strip()
+    if line[0] == line[-1] and line[0] == '"':
+        line = line[1:-1]
     line = ascii(line)
     lines = []
     for entry in line.split('\n'):
