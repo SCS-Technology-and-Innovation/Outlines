@@ -118,10 +118,10 @@ def printout(label, name, status):
                     continue
                 alt = transfers.get(course, None)
                 if alt in mandatory:
-                    sublist += f'\\item {course} {{\\em {names[course]}}} you have registered to already can substitute the mandatory course {alt} {names[alt]}'
+                    sublist += f'\\item {course} {{\\em {names[course]}}} can substitute the mandatory course {alt} {names[alt]}'
                     spent.add(course)
                 elif match(alt, complementary) or match(course, complementary):
-                    sublist += f'\\item {course} {{\\em {names[course]}}} you have registered to already could be used as a complementary course'
+                    sublist += f'\\item {course} {{\\em {names[course]}}} could be used as a complementary course'
                     mentioned.add(course)
             if len(sublist) > 0:
                 listing += f'\\item  {{ \\bf Graduate Certificate in {{\\em {names[cert]}}}}} \\begin{{itemize}}{sublist} \\end{{itemize}}'
