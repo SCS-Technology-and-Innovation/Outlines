@@ -107,13 +107,9 @@ def group(line):
     line = line.strip()
     if line[0] == line[-1] and line[0] == '"':
         line = line[1:-1]
-    line = ascii(line)
     lines = []
     for entry in line.split('\n'):
         cols = entry.split(';')
-        if len(cols) > 4: # format not respected, extra columns cut off
-            # print('WAY TOO MANY COLUMNS', entry)
-            cols = cols[:4]
         while len(cols) < 4:
             cols.append('') # empty missing columns
         lines.append(cols)
@@ -441,10 +437,10 @@ for index, response in data.iterrows():
                     pass
                 if value > 0:
                     total += value
-                    name = entries[1]
+                    name = ascii(entries[1])
                     due = entries[2] if len(entries) > 2 else 'To be defined'
-                    detail = ascii(entries[3]) if len(entries) > 3 else 'To be made available on myCourses'
-                    assessments.append( (perc, name, due, detail) )
+                    assessmentDetail = ascii(entries[3]) if len(entries) > 3 else 'To be made available on myCourses'
+                    assessments.append( (perc, name, due, assessmentDetail) )
         if fabs(total - 100) > THRESHOLD:
             error = f'\nParsing identified {total} percent for the grade instead of 100 percent.'
         items = '\\\\\n\\hline\n'.join([ f'{ip} & {it} & {idl} & {idesc}' for (ip, it, idl, idesc) in assessments ])
