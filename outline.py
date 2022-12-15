@@ -14,6 +14,49 @@ wrong = set()
 
 def ascii(text):
     text = text.replace('%23', '#') # sharepoint export breaks the #    
+
+    text = text.replace('á', "\\'{a}")
+    text = text.replace('é', "\\'{e}")
+    text = text.replace('í', "\\'{\\i}")
+    text = text.replace('ó', "\\'{o}")
+    text = text.replace('ú', "\\'{u}")
+
+    text = text.replace('à', "\\`{a}")
+    text = text.replace('è', "\\`{e}")
+    text = text.replace('ì', "\\`{\\i}")
+    text = text.replace('ò', "\\`{o}")
+    text = text.replace('ù', "\\`{u}")
+
+    text = text.replace('ä', '\\"{a}')
+    text = text.replace('ë', '\\"{e}')
+    text = text.replace('ï', '\\"{\\i}')
+    text = text.replace('ö', '\\"{o}')
+    text = text.replace('ü', '\\"{u}')
+
+    text = text.replace('Á', "\\'{A}")
+    text = text.replace('É', "\\'{E}")
+    text = text.replace('Í', "\\'{I}")
+    text = text.replace('Ó', "\\'{U}")
+    text = text.replace('Ú', "\\'{U}")
+
+    text = text.replace('À', "\\`{A}")
+    text = text.replace('È', "\\`{E}")
+    text = text.replace('Ì', "\\`{I}")
+    text = text.replace('Ò', "\\`{O}")
+    text = text.replace('Ù', "\\`{U}")
+    
+    text = text.replace('Ä', '\\"{A}')
+    text = text.replace('Ë', '\\"{E}')
+    text = text.replace('Ï', '\\"{I}')
+    text = text.replace('Ö', '\\"{O}')
+    text = text.replace('Ü', '\\"{U}')
+
+    text = text.replace('ñ', '\\~{n}')
+    text = text.replace('Ñ', '\\~{N}')
+
+    text = text.replace('ç', '\\c{c}')
+    text = text.replace('Ç', '\\c{C}')
+
     text = text.replace('#s#', '\n\\begin{itemize}')
     text = text.replace('#i#', '\n\\item ')
     text = text.replace('#e#', '\n\\end{itemize}')
@@ -202,22 +245,22 @@ for index, response in data.iterrows():
     if len(code) < 3:
         print('Skipping an empty row')
         continue
-    section = str(response[s]).strip() # course section
-    if len(section) == 0 and '-' in code:
+    sections = str(response[s]).strip() # course section
+    if len(sections) == 0 and '-' in code:
         parts = code.split('-')
         code = parts[0].strip()
-        section = parts[1]
-    if 'CRN' in section:
+        sections = parts[1]
+    if 'CRN' in sections:
         # error = '\nExtra details provided in section number\n'
-        if '(' in section:
-            section = section.split('(').pop(0).strip()
-    if 'Fall' in section:
+        if '(' in sections:
+            sections = sections.split('(').pop(0).strip()
+    if 'Fall' in sections:
         error = '\nActual section number is missing\n'
         print(code, 'lacks section number, omitting')
         continue
     if '-' in code: # someone wrote <YCIT 001 - 001>
         parts = code.split('-')
-        section = parts[-1].strip()
+        sections = parts[-1].strip()
         code = parts[0].strip()
     lettercode = None
     numbercode = None
@@ -226,199 +269,201 @@ for index, response in data.iterrows():
     else:
         lettercode = code[:3]
         numbercode = code[4:]
-    outline = template.replace('!!TERM!!', term) 
-    outline = outline.replace('!!CODE!!', code)
-    section = '{:03d}'.format(int(section))    
-    outline = outline.replace('!!SECTION!!', section)
-    print('Retrieving CA/TA for', code, section)
-    outline = outline.replace('!!ASSISTANT!!', assistant.get(f'{term} {code} {section}', allbymyself))
-    code = code.replace(' ', '') # no spaces in the filename
-    section = str(section)
-    while len(section) < 3:
-        section = '0' + section
-    if len(code) != 7:
-        print(f'Wrong code length, skipping {code} {section}')
-        continue
-    output = f'{shortterm}-{code}-{section}.tex'
-    if exists(output):
-        print('Reprocessing', output)
-    else:
-        print('Processing', output)
-    outline = outline.replace('!!NAME!!', ascii(response[t])) # course title
-    outline = outline.replace('!!CODE!!', code)
-    outline = outline.replace('!!SECTION!!', section)
-    outline = outline.replace('!!INSTRUCTOR!!', contact(response[prof].strip())) # instructor
-    hours = response.get(h, '')
-    if len(hours) == 0:
-        hours = 'Upon request'
-    outline = outline.replace('!!HOURS!!', hours.strip())
-    additionalDetails = None
-    if lettercode is not None and numbercode is not None:
-        print('Extracting additional details for', lettercode, numbercode)
-        additionalDetails = info.loc[(info['Code'] == lettercode) & (info['Number'] == int(numbercode))]
-    else:
-        error += '\nCourse code specification not found'
-    if additionalDetails is None or additionalDetails.empty:
-        error += '\nCourse details not in the domain catalogue, corresponding fields will not be populated\n'
-    else:
-        graduate = lettercode[-1] == '2' or numbercode[0] == '6' or numbercode[0] == '5'
-        if graduate:
-            print(lettercode, numbercode, 'is a graduate course')
-        prereq = additionalDetails['Pre-requisites'].iloc[0]
-        if pd.isna(prereq):
-            outline = outline.replace('!!PREREQ!!', 'No pre-requisites')        
-        else:
-            outline = outline.replace('!!PREREQ!!', prereq)
-        coreq = additionalDetails['Co-requisites'].iloc[0]
-        if pd.isna(coreq):
-            outline = outline.replace('!!COREQ!!', 'No co-requisites')
-        else:
-            outline = outline.replace('!!COREQ!!', coreq)
-        amount = additionalDetails['Credit amount'].iloc[0]
-        amount = round(int(amount)) # no .0
-        kind = ''
-        if additionalDetails['Credit type'].iloc[0] == 'credits':
-            if graduate:
-                outline = outline.replace('!!GRADING!!', '\\input{graduate.tex}')
-                kind = 'Graduate-level credit course'
-            else:
-                outline = outline.replace('!!GRADING!!', '\\input{undergraduate.tex}')
-                kind = 'Undergraduate-level credit course'
-            outline = outline.replace('!!CREDITS!!', f'{amount} credits')
-            outline = outline.replace('!!TRAINING!!', '\\input{training.tex}')
-            outline = outline.replace('!!FINAL!!', '\\input{minerva.tex}')
-            outline = outline.replace('!!PROFILE!!', '\\input{profilem.tex}')            
-        else:
-            kind = 'Non-credit course'
-            outline = outline.replace('!!CREDITS!!', f'{amount} CEUs')
-            outline = outline.replace('!!GRADING!!', '\\input{noncredit.tex}')
-            outline = outline.replace('!!TRAINING!!', '')
-            outline = outline.replace('!!FINAL!!', '\\input{athena.tex}')
-            outline = outline.replace('!!PROFILE!!', '\\input{profilea.tex}')                       
-        outline = outline.replace('!!KIND!!', f'{kind}')
-        h = additionalDetails['Contact hours'].iloc[0]
-        if h is None or h == 'None' or pd.isna(h): # credit-side default is 39
-            h = 39
-        else:
-            h = round(int(h)) # no .0
-        outline = outline.replace('!!CONTACT!!', f'{h} hours')
-        h = additionalDetails['Approximate assignment hours'].iloc[0]
-        if h is None or h == 'None' or pd.isna(h):
-            outline = outline.replace('!!ASSIGNMENT!!','') # nothing goes here
-        else:
-            h = round(int(h)) # no .0
-            outline = outline.replace('!!ASSIGNMENT!!',
-                                      f'\\item[Independent study hours]{{Approximately {h} hours }}')
-    outline = outline.replace('!!DESCRIPTION!!', ascii(response[d]))
-    outline = outline.replace('!!OUTCOMES!!', ascii(response[o]))
-    method = ascii(str(response[m]))
-    if len(method) == 0:
-        method = 'Teaching and learning approach is experiential, collaborative, and problem-based'
-    outline = outline.replace('!!METHODS!!', method)
-    # hardware
-    thwmin = ascii(response[hwmin])
-    if len(thwmin.strip()) == 0:
-        thwmin = 'No specific computer hardware is required.'
-    thwrec = ascii(response[hwrec])
-    if len(thwrec) > 0:
-        thwrec = '\\subsubsection{Recommended computer hardware}\n\n' + thwrec
-    outline = outline.replace('!!HARDWARE!!', thwmin + thwrec)                
-    # admin 
-    if ascii(response[admin]) == 'yes':
-        outline = outline.replace('!!ADMIN!!', '\\input{admin.tex}')
-    else:
-        outline = outline.replace('!!ADMIN!!', '')
-    # software 
-    tswmin = ascii(response[swmin])
-    if len(tswmin.strip()) == 0:
-        tswmin = 'No specific software, operating system, or online service is required.'    
-    tswrec = ascii(response[swrec])
-    if len(tswrec.strip()) > 0:
-        tswrec = '\\subsubsection{Recommended software and services}\n\n' + tswrec
-    outline = outline.replace('!!SOFTWARE!!', tswmin + tswrec)        
-    # internet
-    timin = ascii(response[imin])
-    if len(timin.strip()) == 0:
-        timin = 'There are no specific requirements regarding the type of internet connection for this course.'        
-    tirec = ascii(response[irec])
-    if len(tirec) > 0:
-        tirec = '\\subsubsection{Recommended internet connection}\n\n' + tirec         
-    outline = outline.replace('!!INTERNET!!', timin + tirec)
-    # READINGS
-    required = ascii(str(response[req]))
-    if len(required) == 0:
-        required = 'Readings and assignments provided through myCourses'
-    outline = outline.replace('!!READINGS!!', required)
-    optional = ascii(str(response[opt]))
-    if len(optional) > 0:
-        optional = f'\\subsection{{Optional Materials}}\n\n{optional}\n'
-    outline = outline.replace('!!OPTIONAL!!', optional)
-
-    # ADDITIONAL INFO
-    ai = ascii(response[adinfo])
-    if len(ai) > 0:
-        aic = f'\\section{{Additional Course Details}}\n\n{ai}\n'
-        outline = outline.replace('!!ADDITIONAL!!', aic)
-    else:
-        outline = outline.replace('!!ADDITIONAL!!', '') # blank        
-    try:
-        attendance = int(response[a]) # should be a number
-    except:
-        attendance = 0 # zero if blank    
-    expl = ascii(response[e])
-    if attendance > 0 and len(expl) == 0:
-        expl = DEFAULT
-    assessments = []
-    if attendance > 0:
-        assessments.append((attendance,
-                            'Attendance and active participation',
-                            'See myCourses for more information', expl ))
-    total = float(attendance)
-    items = response[graded]
-    if debug:
-        idx = 0
-        for r in response:
-            rs = str(r)
-            if len(rs) > 10:
-                rs = rs[:10]
-            print(idx, header[idx], '\n  ', rs, '\n')
-            idx += 1
-        print('###', items)
-    for entries in group(items):
-        if len(entries) >= 2:
-            perc = entries[0].replace('\%', '')
-            contrib = 0
-            value = 0
-            try:
-                value = float(perc)
-            except:
-                pass
-            if value > 0:
-                total += value
-                name = entries[1]
-                due = entries[2] if len(entries) > 2 else 'To be defined'
-                detail = ascii(entries[3]) if len(entries) > 3 else 'To be made available on myCourses'
-                assessments.append( (perc, name, due, detail) )
-    if fabs(total - 100) > THRESHOLD:
-        error = f'\nParsing identified {total} percent for the grade instead of 100 percent.'
-    items = '\\\\\n\\hline\n'.join([ f'{ip} & {it} & {idl} & {idesc}' for (ip, it, idl, idesc) in assessments ])
-    outline = outline.replace('!!ITEMS!!', items)
-    sessions = [ ascii(response[header.index(f'session {k}')]) for k in range(1, 14) ]
-    content = '\n'.join([ f'\\item{{{ascii(r)}}}' if len(r) > 0 else '' for r in sessions ])
-    outline = outline.replace('\\item{!!CONTENT!!}', ascii(content))
-    outline = outline.replace('!!INFO!!', '\\textcolor{blue}{Complementary information to be inserted soon.}')    
-    if len(error) > 0:
-        error = f'\\textcolor{{red}}{{{error}}}'
-        if skip and output not in wrong and exists(output):
-            print('Omitting a broken version for', output, 'since an error-free one exists')
+    if ',' in sections:
+        sections = sections.replace(',', ' ')
+    for section in sections.split():
+        section = '{:03d}'.format(int(section))
+        outline = template.replace('!!TERM!!', term) 
+        outline = outline.replace('!!CODE!!', code)
+        outline = outline.replace('!!SECTION!!', section)
+        print('Retrieving CA/TA for', code, section)
+        outline = outline.replace('!!ASSISTANT!!', assistant.get(f'{term} {code} {section}', allbymyself))
+        code = code.replace(' ', '') # no spaces in the filename
+        section = str(section)
+        while len(section) < 3:
+            section = '0' + section
+        if len(code) != 7:
+            print(f'Wrong code length, skipping {code} {section}')
             continue
-        wrong.add(output)
-        print('Storing a version of', output, 'that contains errors:', error)
-    else:
-        if output in wrong:
-            wrong.remove(output)
-        print('Storing an error-free version of', output)
-    outline = outline.replace('!!ERROR!!', error)
-    with open(output, 'w') as target:
-        print(outline, file = target)
-    
+        output = f'{shortterm}-{code}-{section}.tex'
+        if exists(output):
+            print('Reprocessing', output)
+        else:
+            print('Processing', output)
+        outline = outline.replace('!!NAME!!', ascii(response[t])) # course title
+        outline = outline.replace('!!CODE!!', code)
+        outline = outline.replace('!!SECTION!!', section)
+        outline = outline.replace('!!INSTRUCTOR!!', contact(response[prof].strip())) # instructor
+        hours = response.get(h, '')
+        if len(hours) == 0:
+            hours = 'Upon request'
+        outline = outline.replace('!!HOURS!!', hours.strip())
+        additionalDetails = None
+        if lettercode is not None and numbercode is not None:
+            print('Extracting additional details for', lettercode, numbercode)
+            additionalDetails = info.loc[(info['Code'] == lettercode) & (info['Number'] == int(numbercode))]
+        else:
+            error += '\nCourse code specification not found'
+        if additionalDetails is None or additionalDetails.empty:
+            error += '\nCourse details not in the domain catalogue, corresponding fields will not be populated\n'
+        else:
+            graduate = lettercode[-1] == '2' or numbercode[0] == '6' or numbercode[0] == '5'
+            if graduate:
+                print(lettercode, numbercode, 'is a graduate course')
+            prereq = additionalDetails['Pre-requisites'].iloc[0]
+            if pd.isna(prereq):
+                outline = outline.replace('!!PREREQ!!', 'No pre-requisites')        
+            else:
+                outline = outline.replace('!!PREREQ!!', prereq)
+            coreq = additionalDetails['Co-requisites'].iloc[0]
+            if pd.isna(coreq):
+                outline = outline.replace('!!COREQ!!', 'No co-requisites')
+            else:
+                outline = outline.replace('!!COREQ!!', coreq)
+            amount = additionalDetails['Credit amount'].iloc[0]
+            amount = round(int(amount)) # no .0
+            kind = ''
+            if additionalDetails['Credit type'].iloc[0] == 'credits':
+                if graduate:
+                    outline = outline.replace('!!GRADING!!', '\\input{graduate.tex}')
+                    kind = 'Graduate-level credit course'
+                else:
+                    outline = outline.replace('!!GRADING!!', '\\input{undergraduate.tex}')
+                    kind = 'Undergraduate-level credit course'
+                outline = outline.replace('!!CREDITS!!', f'{amount} credits')
+                outline = outline.replace('!!TRAINING!!', '\\input{training.tex}')
+                outline = outline.replace('!!FINAL!!', '\\input{minerva.tex}')
+                outline = outline.replace('!!PROFILE!!', '\\input{profilem.tex}')            
+            else:
+                kind = 'Non-credit course'
+                outline = outline.replace('!!CREDITS!!', f'{amount} CEUs')
+                outline = outline.replace('!!GRADING!!', '\\input{noncredit.tex}')
+                outline = outline.replace('!!TRAINING!!', '')
+                outline = outline.replace('!!FINAL!!', '\\input{athena.tex}')
+                outline = outline.replace('!!PROFILE!!', '\\input{profilea.tex}')                       
+            outline = outline.replace('!!KIND!!', f'{kind}')
+            h = additionalDetails['Contact hours'].iloc[0]
+            if h is None or h == 'None' or pd.isna(h): # credit-side default is 39
+                h = 39
+            else:
+                h = round(int(h)) # no .0
+            outline = outline.replace('!!CONTACT!!', f'{h} hours')
+            h = additionalDetails['Approximate assignment hours'].iloc[0]
+            if h is None or h == 'None' or pd.isna(h):
+                outline = outline.replace('!!ASSIGNMENT!!','') # nothing goes here
+            else:
+                h = round(int(h)) # no .0
+                outline = outline.replace('!!ASSIGNMENT!!',
+                                          f'\\item[Independent study hours]{{Approximately {h} hours }}')
+        outline = outline.replace('!!DESCRIPTION!!', ascii(response[d]))
+        outline = outline.replace('!!OUTCOMES!!', ascii(response[o]))
+        method = ascii(str(response[m]))
+        if len(method) == 0:
+            method = 'Teaching and learning approach is experiential, collaborative, and problem-based'
+        outline = outline.replace('!!METHODS!!', method)
+        # hardware
+        thwmin = ascii(response[hwmin])
+        if len(thwmin.strip()) == 0:
+            thwmin = 'No specific computer hardware is required.'
+        thwrec = ascii(response[hwrec])
+        if len(thwrec) > 0:
+            thwrec = '\\subsubsection{Recommended computer hardware}\n\n' + thwrec
+        outline = outline.replace('!!HARDWARE!!', thwmin + thwrec)                
+        # admin 
+        if ascii(response[admin]) == 'yes':
+            outline = outline.replace('!!ADMIN!!', '\\input{admin.tex}')
+        else:
+            outline = outline.replace('!!ADMIN!!', '')
+        # software 
+        tswmin = ascii(response[swmin])
+        if len(tswmin.strip()) == 0:
+            tswmin = 'No specific software, operating system, or online service is required.'    
+        tswrec = ascii(response[swrec])
+        if len(tswrec.strip()) > 0:
+            tswrec = '\\subsubsection{Recommended software and services}\n\n' + tswrec
+        outline = outline.replace('!!SOFTWARE!!', tswmin + tswrec)        
+        # internet
+        timin = ascii(response[imin])
+        if len(timin.strip()) == 0:
+            timin = 'There are no specific requirements regarding the type of internet connection for this course.'        
+        tirec = ascii(response[irec])
+        if len(tirec) > 0:
+            tirec = '\\subsubsection{Recommended internet connection}\n\n' + tirec         
+        outline = outline.replace('!!INTERNET!!', timin + tirec)
+        # READINGS
+        required = ascii(str(response[req]))
+        if len(required) == 0:
+            required = 'Readings and assignments provided through myCourses'
+            outline = outline.replace('!!READINGS!!', required)
+            optional = ascii(str(response[opt]))
+            if len(optional) > 0:
+                optional = f'\\subsection{{Optional Materials}}\n\n{optional}\n'
+            outline = outline.replace('!!OPTIONAL!!', optional)
+
+        # ADDITIONAL INFO
+        ai = ascii(response[adinfo])
+        if len(ai) > 0:
+            aic = f'\\section{{Additional Course Details}}\n\n{ai}\n'
+            outline = outline.replace('!!ADDITIONAL!!', aic)
+        else:
+            outline = outline.replace('!!ADDITIONAL!!', '') # blank        
+        try:
+            attendance = int(response[a]) # should be a number
+        except:
+            attendance = 0 # zero if blank    
+        expl = ascii(response[e])
+        if attendance > 0 and len(expl) == 0:
+            expl = DEFAULT
+        assessments = []
+        if attendance > 0:
+            assessments.append((attendance,
+                                'Attendance and active participation',
+                                'See myCourses for more information', expl ))
+        total = float(attendance)
+        items = response[graded]
+        if debug:
+            idx = 0
+            for r in response:
+                rs = str(r)
+                if len(rs) > 10:
+                    rs = rs[:10]
+                print(idx, header[idx], '\n  ', rs, '\n')
+                idx += 1
+            print('###', items)
+        for entries in group(items):
+            if len(entries) >= 2:
+                perc = entries[0].replace('\%', '')
+                contrib = 0
+                value = 0
+                try:
+                    value = float(perc)
+                except:
+                    pass
+                if value > 0:
+                    total += value
+                    name = entries[1]
+                    due = entries[2] if len(entries) > 2 else 'To be defined'
+                    detail = ascii(entries[3]) if len(entries) > 3 else 'To be made available on myCourses'
+                    assessments.append( (perc, name, due, detail) )
+        if fabs(total - 100) > THRESHOLD:
+            error = f'\nParsing identified {total} percent for the grade instead of 100 percent.'
+        items = '\\\\\n\\hline\n'.join([ f'{ip} & {it} & {idl} & {idesc}' for (ip, it, idl, idesc) in assessments ])
+        outline = outline.replace('!!ITEMS!!', items)
+        sessions = [ ascii(response[header.index(f'session {k}')]) for k in range(1, 14) ]
+        content = '\n'.join([ f'\\item{{{ascii(r)}}}' if len(r) > 0 else '' for r in sessions ])
+        outline = outline.replace('\\item{!!CONTENT!!}', ascii(content))
+        outline = outline.replace('!!INFO!!', '\\textcolor{blue}{Complementary information to be inserted soon.}')    
+        if len(error) > 0:
+            error = f'\\textcolor{{red}}{{{error}}}'
+            if skip and output not in wrong and exists(output):
+                print('Omitting a broken version for', output, 'since an error-free one exists')
+                continue
+            wrong.add(output)
+            print('Storing a version of', output, 'that contains errors:', error)
+        else:
+            if output in wrong:
+                wrong.remove(output)
+            print('Storing an error-free version of', output)
+        outline = outline.replace('!!ERROR!!', error)
+        with open(output, 'w') as target:
+            print(outline, file = target)
