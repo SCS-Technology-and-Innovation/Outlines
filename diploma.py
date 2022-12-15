@@ -21,6 +21,31 @@ names = {
     'CCCS 670' : 'Information Visualization',
     'CCCS 680' : 'Scalable Data Analysis',
     'CCCS 690' : 'Applied Computational Research',
+    'CMIS 549' : 'Digital Media and Search Engine Optimization',
+    'CMR2 650' : 'Digital Marketing Management',
+    'CMR2 542' : 'Marketing Principles and Applications', 
+    'CMR2 542' : 'Marketing Principles and Applications',
+    'CMR2 543' : 'Marketing of Services', 
+    'CMR2 643' : 'Marketing of Services', 
+    'CMR2 548' : 'Processes of Marketing Research',  
+    'CMR2 648' : 'Marketing Research and Reporting', 
+    'CPL2 510' : 'Communication and Networking Skills', 
+    'CPL2 610' : 'Advanced Communication and Presentation Skills',  
+    'CGM2 520' : 'Sales Management and Negotiation Skills', 
+    'CGM2 520' : 'Sales Management and Negotiation Skills',
+    'CMR2 564' : 'Marketing Communications: A Strategic Approach',
+    'CMR2 644' : 'Integrated Marketing Communications', 
+    'CMR2 556' : 'Buyer Behaviour', 
+    'CMR2 668' : 'Buyer Behaviour',
+    'CGM2 520' : 'Sales Management and Negotiation Strategies',
+    'CMR2 643' : 'Marketing of Services', 
+    'CPL2 610' : 'Advanced Communication and Presentation Skills',
+    'CPRL 644' : 'Integrated Digital Communications',
+    'CGM2 520' : 'Sales Management and Negotiation Strategies',
+    'CMR2 643' : 'Marketing of Services', 
+    'CMR2 648' : 'Marketing Research and Reporting', 
+    'CPRL 650' : 'Digital Marketing Management', 
+    'CPL2 610' : 'Advanced Communication and Presentation Skills'
 }
 
 transfers = {
@@ -30,7 +55,19 @@ transfers = {
     "CMS2 529" : "CCCS 650", # revision, mandatory C2
     "CMS2 527" : "CMS2 627", # ME kept it, code change
     "CMS2 505" : "CCCS 640", # revision, mandatory C2
-    "CCS2 505" : "CCCS 610" # close enough, mandatory C1
+    "CCS2 505" : "CCCS 610", # close enough, mandatory C1
+    'CMIS 549' : 'CMR2 650', # chart equiv marketing
+    'CMR2 542' : 'CMR2 642', # chart equiv marketing
+    'CMR2 543' : 'CMR2 643', # chart equiv marketing
+    'CMR2 548' : 'CMR2 648', # chart equiv marketing
+    'CPL2 510' : 'CPL2 610', # chart equiv marketing
+    'CMR2 566' : 'CGM2 520', # chart equiv marketing
+    'CMR2 566' : 'CMR2 643', # chart equiv marketing
+    'CMR2 566' : 'CPL2 610', # chart equiv marketing
+    'CMR2 566' : 'CPRL 644', # chart equiv marketing
+    'CMR2 564' : 'CMR2 644', # chart equiv marketing
+    'CMR2 556' : 'CMR2 668', # chart equiv marketing
+    'CMR2 570' : 'CMR2 691' # chart equiv marketing
 }
 
 schedule = {
@@ -101,7 +138,7 @@ def printout(label, name, status):
                 term = full(when)
                 listing += f'\\item {course} {{\\em {names[course]}}} will be available for registration in {term}\n'
             else:
-                listing += f'\\item \\textcolor{{red}}{{ERROR: nothing defined for {course} yet}}\n'
+                listing += f'\\item \\textcolor{{red}}{{ERROR: nothing scheduled for {course} yet}}\n'
             
     listing += '\\end{itemize}'
     content = content.replace('!!LIST!!', listing)
@@ -118,16 +155,20 @@ def printout(label, name, status):
                     continue
                 alt = transfers.get(course, None)
                 if alt in mandatory:
-                    sublist += f'\\item {course} {{\\em {names[course]}}} can substitute the mandatory course {alt} {names[alt]}'
+                    sublist += f'\\item {course} {{\\em {names[course]}}} can substitute the {{\\bf mandatory}} course {alt} {names[alt]}'
                     spent.add(course)
                 elif match(alt, complementary) or match(course, complementary):
                     sublist += f'\\item {course} {{\\em {names[course]}}} could be used as a complementary course'
                     mentioned.add(course)
             if len(sublist) > 0:
-                listing += f'\\item  {{ \\bf Graduate Certificate in {{\\em {names[cert]}}}}} \\begin{{itemize}}{sublist} \\end{{itemize}}'
+                note = ''
+                if mandatory.issubset(spent) and len(mentioned) >= 2:
+                    note = '(could be completed)'
+                listing += f'\\item  {{ \\bf Graduate Certificate in {{\\em {names[cert]}}}}} \\ {note} \\begin{{itemize}}{sublist} \\end{{itemize}}'
         for course in available - (spent | mentioned):
             listing += f'\\item \\textcolor{{red}}{{ERROR: nothing defined for {course} yet}}\n'
-        listing += '\\end{itemize}'        
+        listing += '\\end{itemize}'
+        
         content = content.replace('!!CERT!!', listing)    
     with open(f'studyplan-{label}.tex', 'w') as output:
         print(content, file = output)
