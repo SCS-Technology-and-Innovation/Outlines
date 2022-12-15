@@ -6,7 +6,7 @@ from datetime import datetime
 from os.path import exists
 
 skip = False
-debug = False
+debug = True
 THRESHOLD = 0.05
 DEFAULT = 'This course consists of a community of learners of which you are an integral member; your active participation is therefore essential to its success. This means: attending class; visiting myCourses, doing the assigned readings/exercises before class; and engaging in class discussions/activities.'
 
@@ -113,6 +113,8 @@ def group(line):
         while len(cols) < 4:
             cols.append('') # empty missing columns
         lines.append(cols)
+    if debug:
+        print(lines)
     return lines
 
 # load the course information sheet
@@ -428,7 +430,7 @@ for index, response in data.iterrows():
             print('###', items)
         for entries in group(items):
             if len(entries) >= 2:
-                perc = entries[0].replace('\%', '')
+                perc = entries[0].replace('%', '').replace('\\', '')
                 contrib = 0
                 value = 0
                 try:
