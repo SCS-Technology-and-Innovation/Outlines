@@ -392,11 +392,11 @@ for index, response in data.iterrows():
         required = ascii(str(response[req]))
         if len(required) == 0:
             required = 'Readings and assignments provided through myCourses'
-            outline = outline.replace('!!READINGS!!', required)
-            optional = ascii(str(response[opt]))
-            if len(optional) > 0:
-                optional = f'\\subsection{{Optional Materials}}\n\n{optional}\n'
-            outline = outline.replace('!!OPTIONAL!!', optional)
+        outline = outline.replace('!!READINGS!!', required)
+        optional = ascii(str(response[opt]))
+        if len(optional) > 0:
+            optional = f'\\subsection{{Optional Materials}}\n\n{optional}\n'
+        outline = outline.replace('!!OPTIONAL!!', optional)
 
         # ADDITIONAL INFO
         ai = ascii(response[adinfo])
