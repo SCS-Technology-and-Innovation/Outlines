@@ -6,7 +6,7 @@ from datetime import datetime
 from os.path import exists
 
 skip = False
-debug = True
+debug = False
 THRESHOLD = 0.05
 DEFAULT = 'This course consists of a community of learners of which you are an integral member; your active participation is therefore essential to its success. This means: attending class; visiting myCourses, doing the assigned readings/exercises before class; and engaging in class discussions/activities.'
 
@@ -105,7 +105,7 @@ def contact(text):
 
 def group(line):
     line = line.strip()
-    if line[0] == line[-1] and line[0] == '"':
+    if len(line) > 0 and line[0] == line[-1] and line[0] == '"':
         line = line[1:-1]
     lines = []
     for entry in line.split('\n'):
