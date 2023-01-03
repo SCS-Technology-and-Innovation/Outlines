@@ -240,14 +240,14 @@ for index, response in data.iterrows():
         term = 'Fall 2022' # default since we did not ask for the term in the start
     shortterm = term[0] + term[-2:]
     code = response[n].strip() # course number
+    code = code.replace('-', ' ') # for Hugue
+    code = ' '.join(code.split()) # also for Hugue
     if len(code) < 3:
         print('Skipping an empty row')
         continue
     sections = str(response[s]).strip() # course section
-    if len(sections) == 0 and '-' in code:
-        parts = code.split('-')
-        code = parts[0].strip()
-        sections = parts[1]
+    if len(sections) == 0:
+        error = '\nMissing section number\n'
     if 'CRN' in sections:
         # error = '\nExtra details provided in section number\n'
         if '(' in sections:
@@ -263,7 +263,9 @@ for index, response in data.iterrows():
     lettercode = None
     numbercode = None
     if ' ' in code:
-        lettercode, numbercode = code.split(' ')
+        parts = code.split()
+        lettercode = parts.pop(0)
+        numbercode = parts.pop(0)
     else:
         lettercode = code[:3]
         numbercode = code[4:]
