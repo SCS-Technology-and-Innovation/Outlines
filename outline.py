@@ -5,7 +5,7 @@ from math import fabs
 from datetime import datetime
 from os.path import exists
 
-skip = False
+skip = False # hey yaz
 debug = False
 THRESHOLD = 0.05
 DEFAULT = 'This course consists of a community of learners of which you are an integral member; your active participation is therefore essential to its success. This means: attending class; visiting myCourses, doing the assigned readings/exercises before class; and engaging in class discussions/activities.'
