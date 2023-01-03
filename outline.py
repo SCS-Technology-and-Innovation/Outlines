@@ -133,7 +133,8 @@ TAsheet = { 'Fall 2022': 'TAs_fall_2022',
             'Winter 2023': 'TAs_winter_2023' }
 
 # load the TA information
-assistant = dict()
+from collections import defaultdict
+assistant = defaultdict(list)
 TAinfo = pd.ExcelFile('Teaching_Assistants.xlsx')
 for term in TAsheet:
     TAs  = TAinfo.parse(TAsheet[term])
@@ -152,17 +153,18 @@ for term in TAsheet:
         number = int(row[tacn])
         section = int(row[tas])
         kind = row[tat]
+        ast = 'Teaching Assistant' if kind == 'TA' else 'Course Assistant'
         if 'TA 120' in name:
             name = name.replace('TA 120', '')
         if 'low registration' in name:
             continue
-        details = f'\item[Assistant ({kind})]{{{name}}}'
-        print(code, number, section, details)
+        details = f'\item[{ast}]{{{name}}}'
+        print(term, code, number, section, details)
         number = '{:03d}'.format(number)
         section = '{:03d}'.format(section)
-        assistant[f'{term} {code} {number} {section}'] = details
+        assistant[f'{term} {code} {number} {section}'].append(details)
 
-allbymyself = '' # no TA, no CA (say nothing for now)
+allbymyself = [ '' ] # no TA, no CA (say nothing for now)
     
 # load the template
 with open('outline.tex') as source:
@@ -288,7 +290,9 @@ for index, response in data.iterrows():
         outline = outline.replace('!!CODE!!', code)
         outline = outline.replace('!!SECTION!!', section)
         print('Retrieving CA/TA for', code, section)
-        outline = outline.replace('!!ASSISTANT!!', assistant.get(f'{term} {code} {section}', allbymyself))
+        assigned = assistant.get(f'{term} {code} {section}', allbymyself)
+        assistants = '\n\n'.join(assigned)
+        outline = outline.replace('!!ASSISTANT!!', assistants)
         code = code.replace(' ', '') # no spaces in the filename
         section = str(section)
         while len(section) < 3:
