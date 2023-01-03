@@ -12,6 +12,16 @@ DEFAULT = 'This course consists of a community of learners of which you are an i
 
 wrong = set()
 
+def capsfix(text):
+    words = text.split()
+    fixed = []
+    for word in words:
+        if word.isupper():
+            fixed.append(word.capitalize())
+        else:
+            fixed.append(word)
+    return ' '.join(fixed)
+
 def ascii(text):
     text = text.replace('%23', '#') # sharepoint export breaks the #    
 
@@ -119,7 +129,8 @@ def group(line):
 
 # load the course information sheet
 info = pd.read_csv('courses.csv')
-TAsheet = { 'Fall 2022': 'TAs_fall_2022' }
+TAsheet = { 'Fall 2022': 'TAs_fall_2022',
+            'Winter 2023': 'TAs_winter_2023' }
 
 # load the TA information
 assistant = dict()
@@ -134,21 +145,21 @@ for term in TAsheet:
     tan = TAh.index('Candidate')
     for index, row in TAs.iterrows():
         name = row[tan]
-        if not  isinstance(name, str):
+        if not isinstance(name, str):
             break
         name = name.lstrip().strip()
         code = row[tacl].strip()
-        number = row[tacn]
-        section = row[tas]
+        number = int(row[tacn])
+        section = int(row[tas])
         kind = row[tat]
         if 'TA 120' in name:
             name = name.replace('TA 120', '')
         if 'low registration' in name:
             continue
         details = f'\item[Assistant ({kind})]{{{name}}}'
+        print(code, number, section, details)
         number = '{:03d}'.format(number)
         section = '{:03d}'.format(section)
-        # print(code, number, section, details)
         assistant[f'{term} {code} {number} {section}'] = details
 
 allbymyself = '' # no TA, no CA (say nothing for now)
@@ -290,7 +301,8 @@ for index, response in data.iterrows():
             print('Reprocessing', output)
         else:
             print('Processing', output)
-        outline = outline.replace('!!NAME!!', ascii(response[t])) # course title
+        ct = ascii(response[t]) # course title            
+        outline = outline.replace('!!NAME!!', capsfix(ct))
         outline = outline.replace('!!CODE!!', code)
         outline = outline.replace('!!SECTION!!', section)
         outline = outline.replace('!!INSTRUCTOR!!', contact(response[prof].strip())) # instructor
