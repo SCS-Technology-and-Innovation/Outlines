@@ -67,9 +67,16 @@ def ascii(text):
     text = text.replace('ç', '\\c{c}')
     text = text.replace('Ç', '\\c{C}')
 
+    # a fix for jean-philippe
+    text = text.replace('<', ' ')
+    text = text.replace('>', ' ')    
+    if '#i#' in text and '#s#' not in text:
+        text = text.replace('#i#', '#s#\n#i#', 1) # just the first one
+    if '#s#' in text and '#e#' not in text: # fix for reza
+        text = text + '\n#e#\n' # assume the list keeps going until the end            
     text = text.replace('#s#', '\n\\begin{itemize}')
     text = text.replace('#i#', '\n\\item ')
-    text = text.replace('#e#', '\n\\end{itemize}')
+    text = text.replace('#e#', '\n\\end{itemize}\n\n')
     if '&' in text and '\\&' not in text:
         text = text.replace('&', '\\&') # LaTeX not accounted for
     if '%' in text and '\\%' not in text:
@@ -144,8 +151,14 @@ for term in TAsheet:
     tas = TAh.index('Section')
     tat = TAh.index('Teaching/Course Assistant')
     tan = TAh.index('Candidate')
+    te = TAh.index('McGill Email')
     for index, row in TAs.iterrows():
         name = row[tan]
+        email = str(row[te]).lstrip().strip()
+        if '@' not in email:
+            email = '' # blank out the unavailable
+        else:
+            email = f'({email})'
         if not isinstance(name, str):
             break
         name = name.lstrip().strip()
@@ -158,7 +171,7 @@ for term in TAsheet:
             name = name.replace('TA 120', '')
         if 'low registration' in name:
             continue
-        details = f'\item[{ast}]{{{name}}}'
+        details = f'\item[{ast}]{{{name} {email}}}'
         print(term, code, number, section, details)
         number = '{:03d}'.format(number)
         section = '{:03d}'.format(section)
