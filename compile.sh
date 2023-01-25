@@ -1,4 +1,9 @@
 term=W23
+if grep -q ListSchema sharepoint.csv; then
+    sed '1d' sharepoint.csv > tmp
+    mv tmp sharepoint.csv
+fi
+
 rm *-*.tex
 rm *-*.pdf
 mkdir -p forms

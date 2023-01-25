@@ -449,7 +449,7 @@ for index, response in data.iterrows():
                                 'Attendance and active participation',
                                 'See myCourses for more information', expl ))
         total = float(attendance)
-        items = response[graded]
+        items = ascii(response[graded])
         if debug:
             idx = 0
             for r in response:
