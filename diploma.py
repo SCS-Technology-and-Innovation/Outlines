@@ -161,9 +161,10 @@ def match(course, patterns):
             return True
     return False
                 
-def printout(label, name, passed, dipl):
+def printout(label, name, passed, email, dipl):
     content = template.replace('!!NAME!!', name)
-    content = content.replace('!!SID!!', f'McGill Student ID {label}')    
+    content = content.replace('!!SID!!', f'McGill Student ID {label}')
+    content = content.replace('!!EMAIL!!', email)
     content = content.replace('!!DIPL!!', names[dipl])
     content = content.replace('!!APC!!', APC[dipl])
     # when to take the missing courses
@@ -198,7 +199,7 @@ def printout(label, name, passed, dipl):
                         listing += f'\\item {course} {{\\em {names[course]}}} can be substituted by\n\\begin{{itemize}}[noitemsep,topsep=0pt]\n' + opt + '\\end{itemize}\n'
 
                     else:
-                        error = f'ERROR: nothing scheduled for {course} yet'
+                        error = f'ERROR: nothing scheduled for {course} {label} {email}'
                         print(error)
                         listing += f'\\item \\textcolor{{red}}{{{error}}}\n'
                 else:
@@ -274,12 +275,16 @@ files = {
 import pandas as pd
 
 records = dict()
+emails = dict()
 
 for dataset in files:
     data = pd.ExcelFile(files[dataset])
     students  = data.parse(data.sheet_names[0])
     for index, row in students.iterrows():
-        studentID = str(row[0]) 
+        email = str(row[-9])
+        studentID = str(row[0])
+        if studentID not in emails and email != 'nan':
+            emails[studentID] = email
         if len(studentID) == 9:
             if studentID not in records:
                 fullname = row[3].split('/')
@@ -300,4 +305,4 @@ for dataset in files:
                 print('ignoring', studentID)
 
 for student in records:
-    printout(student, names[student], records[student], dataset)
+    printout(student, names[student], records[student], emails.get(student, ''), dataset)
