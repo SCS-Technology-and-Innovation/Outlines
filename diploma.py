@@ -171,6 +171,8 @@ def printout(label, name, passed, dipl):
     total = len(status)
     completed = sum(status.values())
     missing = total - completed
+    if debug and missing == 10:
+        print(label, 'has no completed courses')        
     if missing == 0: # ready to graduate, no need for a studyplan
         return
     else:
@@ -292,8 +294,7 @@ for dataset in files:
             finalGrade = str(row[35])
             if passing(finalGrade):
                 records[studentID].add(courseCode)
-                if debug:
-                    print(studentID, courseCode, finalGrade)
+                # print(studentID, courseCode, finalGrade)
         else:
             if debug:
                 print('ignoring', studentID)
