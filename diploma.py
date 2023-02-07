@@ -1,3 +1,8 @@
+def passing(grade):
+    if 'W' in grade: # withdrawn
+        return False
+    return 'A' in grade or 'B' in grade
+
 names = {
     "CMS2 500" : "Mathematics for Management",
     "CCS2 505" : "Programming for Data Science",
@@ -81,6 +86,10 @@ APC = {
     'DSCOM': 'Mr.\\ John Gradek'
 } 
 
+required = { 'DDABI': ['CCS2 505', 'CMIS 530', 'CMIS 543', 'CMIS 544',
+                       'CMIS 545', 'CMIS 549', 'CMIS 550', 'CMS2 505',
+                       'CMS2 527', 'CMS2 529'] }
+
 transfers = {
     "CCS2 505" : { "CCCS 610", "CCCS 620" }, # T&I equiv
     "CMIS 545" : { "CCCS 680" }, # close enough
@@ -155,20 +164,21 @@ def match(course, patterns):
             return True
     return False
                 
-def printout(label, name, status, dipl):
+def printout(label, name, passed, dipl):
     content = template.replace('!!NAME!!', name)
     content = content.replace('!!DIPLOMA!!', names[dipl])
     content = content.replace('!!APC!!', APC[dipl])
     # when to take the missing courses
-    completed = sum(status.values())
+    status = { course : course in passed for course in required[dipl] }
+    completed = len(passed)
     missing = len(status) - completed
-    listing = f'You have not yet registered to {missing} courses from the diploma.\n\\begin{{enumerate}}[noitemsep,topsep=0pt]\n'
+    listing = f'You have not yet completed {missing} courses from the diploma.\n\\begin{{enumerate}}[noitemsep,topsep=0pt]\n'
     available = set()
-    for (course, reg) in status.items():
+    for (course, ok) in status.items():
         when = ''
-        if reg:
+        if ok: # already passed
             available.add(course)
-        else:
+        else: # not yet passed
             when = schedule.get(course, None)
             if when is None:
                 subs = transfers.get(course, set())
@@ -192,7 +202,7 @@ def printout(label, name, status, dipl):
     listing += '\\end{enumerate}'
     content = content.replace('!!LIST!!', listing)
     if completed > 0:
-        listing = f'You have already registered for {completed} courses.\n\\begin{{itemize}}[noitemsep,topsep=0pt]\n'
+        listing = f'You have already completed {completed} courses.\n\\begin{{itemize}}[noitemsep,topsep=0pt]\n'
         spent = set()
         mentioned = set()
         # if they were to transfer
@@ -226,25 +236,37 @@ from sys import argv
 debug = 'debug' in argv
 
 files = {
-    'DDABI': 'Students_pending_DiplomaDigAnalytics.xlsx'
+    'DDABI': 'digital.xlsx' # 'Students_pending_DiplomaDigAnalytics.xlsx' (new file from kevork)
 }
 
 import pandas as pd
 
+records = dict()
+
 for dataset in files:
     data = pd.ExcelFile(files[dataset])
     students  = data.parse(data.sheet_names[0])
-    header = [h.strip() for h in students.columns.values.tolist()]
-    courses = header[5:16]
-    for index, student in students.iterrows():
-        studentID = str(student[1])
+    for index, row in students.iterrows():
+        studentID = str(row[0]) 
         if len(studentID) == 9:
-            lastName = student[2]
-            firstName = student[3]
-            name = f'{firstName} {lastName}'
-            reg = student[5:16]
-            done = { course : count > 0 for (course, count) in zip(courses, reg) }
-            printout(studentID, name, done, dataset)
+            if studentID not in records:
+                fullname = row[3].split('/')
+                lastName = fullname[0] 
+                firstName = fullname[1]
+                name = f'{firstName} {lastName}'
+                names[studentID] = name
+                records[studentID] = set()
+            letterCode = row[5]
+            numberCode = int(row[7])
+            courseCode = f'{letterCode} {numberCode:03d}'
+            finalGrade = str(row[35])
+            if passing(finalGrade):
+                records[studentID].add(courseCode)
+                if debug:
+                    print(studentID, courseCode, finalGrade)
         else:
             if debug:
                 print('ignoring', studentID)
+
+for student in records:
+    printout(student, name, records[student], dataset)
