@@ -14,6 +14,7 @@ names = {
     "CMIS 550" : "Fundamentals of Big Data",
     "CMS2 505" : "Quantitative Analysis Tools in Decision Making",
     "CMS2 527" : "Business Intelligence and Analytics",
+    "CMS2 627" : "Business Intelligence and Analytics",
     "CMS2 529" : "Introduction to Data Analytics",
     'DACS' : 'Data Analysis for Complex Systems',
     'DDDM' : 'Data-Driven Decision Making',
@@ -91,7 +92,7 @@ required = { 'DDABI': ['CCS2 505', 'CMIS 530', 'CMIS 543', 'CMIS 544',
                        'CMS2 527', 'CMS2 529'] }
 
 transfers = {
-    "CCS2 505" : { "CCCS 610", "CCCS 620" }, # T&I equiv
+    "CCS2 505" : { "CCCS 610" }, # T&I equiv
     "CMIS 545" : { "CCCS 680" }, # close enough
     "CMIS 550" : { "CCCS 680" }, # revision
     "CMS2 505" : { "CCCS 640", 'CSNM 620' }, # T&I equiv + chart from john and dawne    
@@ -127,11 +128,7 @@ schedule = {
     "CCCS 680" : "S24", # T&I teaching plan
     "CCCS 690" : "S24", # T&I teaching plan
     "CMIS 530" : "S23", # T&I teaching plan
-    "CMIS 543" : "W23", # T&I teaching plan
-    "CMIS 544" : "W23", # T&I teaching plan
     "CMIS 549" : "F23", # T&I teaching plan
-    'CMS2 500' : 'W23', # asked John
-    'CMS2 527' : 'W23', # asked John
     'CMS2 627' : 'F23' # asked John
 }
 
@@ -166,43 +163,62 @@ def match(course, patterns):
                 
 def printout(label, name, passed, dipl):
     content = template.replace('!!NAME!!', name)
-    content = content.replace('!!DIPLOMA!!', names[dipl])
+    content = content.replace('!!SID!!', f'McGill Student ID {label}')    
+    content = content.replace('!!DIPL!!', names[dipl])
     content = content.replace('!!APC!!', APC[dipl])
     # when to take the missing courses
     status = { course : course in passed for course in required[dipl] }
-    completed = len(passed)
-    missing = len(status) - completed
-    listing = f'You have not yet completed {missing} courses from the diploma.\n\\begin{{enumerate}}[noitemsep,topsep=0pt]\n'
-    available = set()
-    for (course, ok) in status.items():
-        when = ''
-        if ok: # already passed
-            available.add(course)
-        else: # not yet passed
-            when = schedule.get(course, None)
-            if when is None:
-                subs = transfers.get(course, set())
-                opt = ''
-                for sub in subs:
-                    when = schedule.get(sub, None)
-                    if when is not None:
-                        term = full(when)                    
-                        opt += f'\item {sub} {names[sub]} which will be available for registration in {term}\n'
-                if opt != '':
-                    listing += f'\\item {course} {{\\em {names[course]}}} can be substituted by\n\\begin{{itemize}}[noitemsep,topsep=0pt]\n' + opt + '\\end{itemize}\n'
+    total = len(status)
+    completed = sum(status.values())
+    missing = total - completed
+    if missing == 0: # ready to graduate, no need for a studyplan
+        return
+    else:
+        pl = 's' if missing > 1 else ''
+        mis = str(missing) if missing < 10 else 'any'
+        listing = f'You have not yet completed {mis} course{pl} from the diploma.\n\\begin{{enumerate}}[noitemsep,topsep=0pt]\n'
+        available = set()
+        for (course, ok) in status.items():
+            when = ''
+            if ok: # already passed
+                available.add(course)
+            else: # not yet passed
+                when = schedule.get(course, None)
+                if when is None:
+                    subs = transfers.get(course, set())
+                    opt = ''
+                    for sub in subs:
+                        when = schedule.get(sub, None)
+                        if when is not None:
+                            term = full(when)                    
+                            opt += f'\item {sub} {names[sub]} which will be available for registration in {term}\n'
+                    if opt != '':
+                        listing += f'\\item {course} {{\\em {names[course]}}} can be substituted by\n\\begin{{itemize}}[noitemsep,topsep=0pt]\n' + opt + '\\end{itemize}\n'
 
+                    else:
+                        error = f'ERROR: nothing scheduled for {course} yet'
+                        print(error)
+                        listing += f'\\item \\textcolor{{red}}{{{error}}}\n'
                 else:
-                    error = f'ERROR: nothing scheduled for {course} yet'
-                    print(error)
-                    listing += f'\\item \\textcolor{{red}}{{{error}}}\n'
-                    
-            else:
-                term = full(when)                                    
-                listing += f'\\item {course} {{\\em {names[course]}}} \\\\ \\phantom{{indent}} will be available for registration in {term}\n'            
-    listing += '\\end{enumerate}'
-    content = content.replace('!!LIST!!', listing)
+                    term = full(when)                                    
+                    listing += f'\\item {course} {{\\em {names[course]}}} \\\\ \\phantom{{indent}} will be available for registration in {term}\n'            
+        listing += '\\end{enumerate}'
+        prefix = '''\\newpage
+
+\\section*{Course availability}
+
+According to our current records, there are required courses in the
+diploma which you have not yet completed.
+\\textcolor{red}{check until when they can still get the diploma}
+
+'''
+        listing = prefix + listing
+        
+        content = content.replace('!!LIST!!', listing)
+    listing = ''
     if completed > 0:
-        listing = f'You have already completed {completed} courses.\n\\begin{{itemize}}[noitemsep,topsep=0pt]\n'
+        pl = 's' if completed > 1 else ''        
+        listing = f'You have already completed {completed} course{pl}.\n\\begin{{itemize}}[noitemsep,topsep=0pt]\n'
         spent = set()
         mentioned = set()
         # if they were to transfer
@@ -227,8 +243,22 @@ def printout(label, name, passed, dipl):
         for course in available - (spent | mentioned):
             listing += f'\\item \\textcolor{{red}}{{ERROR: nothing defined for {course} yet}}\n'
         listing += '\\end{itemize}\n'
-        
-        content = content.replace('!!CERT!!', listing)    
+        prefix = '''\\newpage
+
+\\section*{Possible program transfers}
+
+If you do not wish to complete the diploma, we recommend you to
+consider the option of transferring to the newly created graduate
+certificates as an option to completing the diploma.
+
+Please note that whereas a single course could serve as a
+complementary course in more than one certificate, you are only
+allowed to share one course between two
+certificates. \\textcolor{red}{revise the wording with Sue}
+
+'''
+        listing = prefix + listing
+    content = content.replace('!!CERT!!', listing)    
     with open(f'studyplan-{label}.tex', 'w') as output:
         print(content, file = output)
 
@@ -269,4 +299,4 @@ for dataset in files:
                 print('ignoring', studentID)
 
 for student in records:
-    printout(student, name, records[student], dataset)
+    printout(student, names[student], records[student], dataset)
