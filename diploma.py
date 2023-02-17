@@ -61,7 +61,7 @@ names = {
     'CMS2 525' : 'Supply Chain Management',
     'CSNM 610' : 'Principles of Dynamic Supply Networks',
     'CMS2 531' : 'Re-Engineering and Integration of Business Systems',
-    'CSNM 6??' :  'eBusiness and eLogistics', # code pending
+    'CSNM 6??' : 'eBusiness and eLogistics', # code pending
     'CMS2 532' : 'Lean Operations Systems',
     'CSNM 632' : 'Dynamic Supply Networks and Lean Operations Systems',
     'CMS2 540' : 'Six Sigma Quality Management',
@@ -81,7 +81,7 @@ APC = {
     'DSCOM': 'Mr.\\ John Gradek'
 } 
 
-transfers = {
+suggestions = {
     "CCS2 505" : { "CCCS 610", "CCCS 620" }, # T&I equiv
     "CMIS 545" : { "CCCS 680" }, # close enough
     "CMIS 550" : { "CCCS 680" }, # revision
@@ -89,11 +89,14 @@ transfers = {
     "CMS2 527" : { "CMS2 627" }, # ME kept it, code change
     "CMS2 529" : { "CCCS 650" }, # revision, mandatory C2
     'CGM2 510' : { 'CGM2 610' }, # chart from john and dawne
-    'CMIS 549' : { 'CMR2 650' }, # chart equiv marketing
+    'CMIS 549' : { 'CMR2 650' }, # chart equiv marketing (confirmed with nicolette, actual equivalency)
     'CMR2 542' : { 'CMR2 642' }, # chart equiv marketing
-    'CMR2 543' : { 'CMR2 643' }, # chart equiv marketing
+    'CMR2 543' : { 'CMR2 643' }, # chart equiv marketing (confirmed with nicolette; customer service, no reqs)
     'CMR2 548' : { 'CMR2 648' }, # chart equiv marketing
     'CMR2 556' : { 'CMR2 668' }, # chart equiv marketing
+    'CMIS 544' : { 'CMR2 650', 'CCCS 670' }, # nicolette digital marketing management
+    'CMIS 530' : { 'CMR2 648' }, # nicolette suggests this
+    'CMIS 549' : { 'CMR2 650', 'CCCS 670' }, # nicolete says it is a good match here plus our option
     'CMR2 564' : { 'CMR2 644' }, # chart equiv marketing
     'CMR2 566' : { 'CGM2 520', 'CMR2 643', 'CPL2 610', 'CPRL 644' }, # chart equiv marketing
     'CMR2 570' : { 'CMR2 691' }, # chart equiv marketing
@@ -126,6 +129,12 @@ schedule = {
     'CMS2 627' : 'F23' # asked John
 }
 
+completions = {
+    'DACS' : ({ 'CCCS 610', 'CCCS 620', 'CCCS 630' }, {'CCCS', 'CMIS', 'CMS2', 'CCS2', 'CMR2' }),
+    'DDDM' : ({ 'CCCS 640', 'CCCS 650', 'CCCS 660' }, {'CCCS', 'CMIS', 'CMS2', 'CCS2' }),
+}
+
+
 season = {
     'F' : 'Fall',
     'W' : 'Winter',
@@ -142,10 +151,6 @@ template = None
 with open('studyplan.tex') as source:
     template = source.read()
 
-completions = {
-    'DACS' : ({ 'CCCS 610', 'CCCS 620', 'CCCS 630' }, {'CCCS', 'CMIS', 'CMS2', 'CCS2' }),
-    'DDDM' : ({ 'CCCS 640', 'CCCS 650', 'CCCS 660' }, {'CCCS', 'CMIS', 'CMS2', 'CCS2' }),
-}
 
 def match(course, patterns):
     if course is None:
@@ -171,7 +176,7 @@ def printout(label, name, status, dipl):
         else:
             when = schedule.get(course, None)
             if when is None:
-                subs = transfers.get(course, set())
+                subs = suggestions.get(course, set())
                 opt = ''
                 for sub in subs:
                     when = schedule.get(sub, None)
@@ -202,7 +207,7 @@ def printout(label, name, status, dipl):
             for course in available:
                 if course in spent:
                     continue
-                alt = transfers.get(course, None)
+                alt = suggestions.get(course, None)
                 if alt in mandatory:
                     sublist += f'\\item {course} {{\\em {names[course]}}} can substituted the {{\\bf mandatory}} course {alt} {names[alt]}\n'
                     spent.add(course)
