@@ -1,3 +1,8 @@
+def passing(grade):
+    if 'W' in grade: # withdrawn
+        return False
+    return 'A' in grade or 'B' in grade
+
 names = {
     "CMS2 500" : "Mathematics for Management",
     "CCS2 505" : "Programming for Data Science",
@@ -9,6 +14,7 @@ names = {
     "CMIS 550" : "Fundamentals of Big Data",
     "CMS2 505" : "Quantitative Analysis Tools in Decision Making",
     "CMS2 527" : "Business Intelligence and Analytics",
+    "CMS2 627" : "Business Intelligence and Analytics",
     "CMS2 529" : "Introduction to Data Analytics",
     'DACS' : 'Data Analysis for Complex Systems',
     'DDDM' : 'Data-Driven Decision Making',
@@ -81,8 +87,12 @@ APC = {
     'DSCOM': 'Mr.\\ John Gradek'
 } 
 
+required = { 'DDABI': ['CCS2 505', 'CMIS 530', 'CMIS 543', 'CMIS 544',
+                       'CMIS 545', 'CMIS 549', 'CMIS 550', 'CMS2 505',
+                       'CMS2 527', 'CMS2 529'] }
+
 suggestions = {
-    "CCS2 505" : { "CCCS 610", "CCCS 620" }, # T&I equiv
+    "CCS2 505" : { "CCCS 610" }, # T&I equiv
     "CMIS 545" : { "CCCS 680" }, # close enough
     "CMIS 550" : { "CCCS 680" }, # revision
     "CMS2 505" : { "CCCS 640", 'CSNM 620' }, # T&I equiv + chart from john and dawne    
@@ -121,11 +131,7 @@ schedule = {
     "CCCS 680" : "S24", # T&I teaching plan
     "CCCS 690" : "S24", # T&I teaching plan
     "CMIS 530" : "S23", # T&I teaching plan
-    "CMIS 543" : "W23", # T&I teaching plan
-    "CMIS 544" : "W23", # T&I teaching plan
     "CMIS 549" : "F23", # T&I teaching plan
-    'CMS2 500' : 'W23', # asked John
-    'CMS2 527' : 'W23', # asked John
     'CMS2 627' : 'F23' # asked John
 }
 
@@ -160,44 +166,66 @@ def match(course, patterns):
             return True
     return False
                 
-def printout(label, name, status, dipl):
+def printout(label, name, passed, email, dipl):
     content = template.replace('!!NAME!!', name)
-    content = content.replace('!!DIPLOMA!!', names[dipl])
+    content = content.replace('!!SID!!', f'McGill Student ID {label}')
+    content = content.replace('!!EMAIL!!', email)
+    content = content.replace('!!DIPL!!', names[dipl])
     content = content.replace('!!APC!!', APC[dipl])
     # when to take the missing courses
+    status = { course : course in passed for course in required[dipl] }
+    total = len(status)
     completed = sum(status.values())
-    missing = len(status) - completed
-    listing = f'You have not yet registered to {missing} courses from the diploma.\n\\begin{{enumerate}}[noitemsep,topsep=0pt]\n'
-    available = set()
-    for (course, reg) in status.items():
-        when = ''
-        if reg:
-            available.add(course)
-        else:
-            when = schedule.get(course, None)
-            if when is None:
-                subs = suggestions.get(course, set())
-                opt = ''
-                for sub in subs:
-                    when = schedule.get(sub, None)
-                    if when is not None:
-                        term = full(when)                    
-                        opt += f'\item {sub} {names[sub]} which will be available for registration in {term}\n'
-                if opt != '':
-                    listing += f'\\item {course} {{\\em {names[course]}}} can be substituted by\n\\begin{{itemize}}[noitemsep,topsep=0pt]\n' + opt + '\\end{itemize}\n'
-
+    missing = total - completed
+    if debug and missing == 10:
+        print(label, 'has no completed courses')        
+    if missing == 0: # ready to graduate, no need for a studyplan
+        return
+    else:
+        pl = 's' if missing > 1 else ''
+        mis = str(missing) if missing < 10 else 'any'
+        listing = f'You have not yet completed {mis} course{pl} from the diploma.\n\\begin{{enumerate}}[noitemsep,topsep=0pt]\n'
+        available = set()
+        for (course, ok) in status.items():
+            when = ''
+            if ok: # already passed
+                available.add(course)
+            else: # not yet passed
+                when = schedule.get(course, None)
+                if when is None:
+                    subs = transfers.get(course, set())
+                    opt = ''
+                    for sub in subs:
+                        when = schedule.get(sub, None)
+                        if when is not None:
+                            term = full(when)                    
+                            opt += f'\item {sub} {names[sub]} which will be available for registration in {term}\n'
+                    if opt != '':
+                        listing += f'\\item {course} {{\\em {names[course]}}} can be substituted by\n\\begin{{itemize}}[noitemsep,topsep=0pt]\n' + opt + '\\end{itemize}\n'
+                    else:
+                        error = f'ERROR: nothing scheduled for {course} {label} {email}'
+                        print(error)
+                        listing += f'\\item \\textcolor{{red}}{{{error}}}\n'
                 else:
-                    error = f'ERROR: nothing scheduled for {course} yet'
-                    print(error)
-                    listing += f'\\item \\textcolor{{red}}{{{error}}}\n'
-                    
-            else:
-                term = full(when)                                    
-                listing += f'\\item {course} {{\\em {names[course]}}} \\\\ \\phantom{{indent}} will be available for registration in {term}\n'            
-    listing += '\\end{enumerate}'
-    content = content.replace('!!LIST!!', listing)
+                    term = full(when)                                    
+                    listing += f'\\item {course} {{\\em {names[course]}}} \\\\ \\phantom{{indent}} will be available for registration in {term}\n'            
+        listing += '\\end{enumerate}'
+        prefix = '''\\newpage
+
+\\section*{Course availability}
+
+According to our current records, there are required courses in the
+diploma which you have not yet completed.
+\\textcolor{red}{check until when they can still get the diploma}
+
+'''
+        listing = prefix + listing
+        
+        content = content.replace('!!LIST!!', listing)
+    listing = ''
     if completed > 0:
-        listing = f'You have already registered for {completed} courses.\n\\begin{{itemize}}[noitemsep,topsep=0pt]\n'
+        pl = 's' if completed > 1 else ''        
+        listing = f'You have already completed {completed} course{pl}.\n\\begin{{itemize}}[noitemsep,topsep=0pt]\n'
         spent = set()
         mentioned = set()
         # if they were to transfer
@@ -222,8 +250,22 @@ def printout(label, name, status, dipl):
         for course in available - (spent | mentioned):
             listing += f'\\item \\textcolor{{red}}{{ERROR: nothing defined for {course} yet}}\n'
         listing += '\\end{itemize}\n'
-        
-        content = content.replace('!!CERT!!', listing)    
+        prefix = '''\\newpage
+
+\\section*{Possible program transfers}
+
+If you do not wish to complete the diploma, we recommend you to
+consider the option of transferring to the newly created graduate
+certificates as an option to completing the diploma.
+
+Please note that whereas a single course could serve as a
+complementary course in more than one certificate, you are only
+allowed to share one course between two
+certificates. \\textcolor{red}{revise the wording with Sue}
+
+'''
+        listing = prefix + listing
+    content = content.replace('!!CERT!!', listing)    
     with open(f'studyplan-{label}.tex', 'w') as output:
         print(content, file = output)
 
@@ -231,25 +273,40 @@ from sys import argv
 debug = 'debug' in argv
 
 files = {
-    'DDABI': 'Students_pending_DiplomaDigAnalytics.xlsx'
+    'DDABI': 'digital.xlsx' # 'Students_pending_DiplomaDigAnalytics.xlsx' (new file from kevork)
 }
 
 import pandas as pd
 
+records = dict()
+emails = dict()
+
 for dataset in files:
     data = pd.ExcelFile(files[dataset])
     students  = data.parse(data.sheet_names[0])
-    header = [h.strip() for h in students.columns.values.tolist()]
-    courses = header[5:16]
-    for index, student in students.iterrows():
-        studentID = str(student[1])
+    for index, row in students.iterrows():
+        email = str(row[-9])
+        studentID = str(row[0])
+        if studentID not in emails and email != 'nan':
+            emails[studentID] = email
         if len(studentID) == 9:
-            lastName = student[2]
-            firstName = student[3]
-            name = f'{firstName} {lastName}'
-            reg = student[5:16]
-            done = { course : count > 0 for (course, count) in zip(courses, reg) }
-            printout(studentID, name, done, dataset)
+            if studentID not in records:
+                fullname = row[3].split('/')
+                lastName = fullname[0] 
+                firstName = fullname[1]
+                name = f'{firstName} {lastName}'
+                names[studentID] = name
+                records[studentID] = set()
+            letterCode = row[5]
+            numberCode = int(row[7])
+            courseCode = f'{letterCode} {numberCode:03d}'
+            finalGrade = str(row[35])
+            if passing(finalGrade):
+                records[studentID].add(courseCode)
+                # print(studentID, courseCode, finalGrade)
         else:
             if debug:
                 print('ignoring', studentID)
+
+for student in records:
+    printout(student, names[student], records[student], emails.get(student, ''), dataset)
