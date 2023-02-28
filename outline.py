@@ -432,7 +432,7 @@ for index, response in data.iterrows():
         # ADDITIONAL INFO
         ai = ascii(response[adinfo])
         if len(ai) > 0:
-            aic = f'\\section{{Additional Course Details}}\n\n{ai}\n'
+            aic = f'{ai}\n'
             outline = outline.replace('!!ADDITIONAL!!', aic)
         else:
             outline = outline.replace('!!ADDITIONAL!!', '') # blank        
