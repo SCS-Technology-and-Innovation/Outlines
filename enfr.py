@@ -20,7 +20,7 @@ programname = dict()
 for af in aos:
     if not path.exists(loc[af]):        
         r = requests.get(aos[af], hdr)
-        sleep(randint(1, 5))
+        sleep(randint(10, 15))
         with open(loc[af], 'w') as target:
             print(' '.join(r.text.split()), file = target)
     with open(loc[af]) as source:
