@@ -12,6 +12,16 @@ DEFAULT = 'This course consists of a community of learners of which you are an i
 
 wrong = set()
 
+def o2l(t):
+    if ";" not in t:
+        return t
+    s = '#s#\n'
+    for part in t.split(';'):
+        part = part.strip()
+        if len(part) > 0:
+            s += '#i# ' + part + '\n'
+    return s + '#e#';
+
 def capsfix(text):
     words = text.split()
     fixed = []
@@ -192,7 +202,7 @@ if 'sharepoint' not in argv:
     data  = responses.parse(responses.sheet_names[0])
 else:
     data = pd.read_csv('sharepoint.csv', header = [0], engine = 'python')
-    fixed = 'Winter 2023'
+    fixed = 'Summer 2023'
 
 header = [h.strip().lower() for h in data.columns.values.tolist()]
 HWMIN = 'required minimum computer hardware specifications'
@@ -391,10 +401,10 @@ for index, response in data.iterrows():
             method = 'Teaching and learning approach is experiential, collaborative, and problem-based'
         outline = outline.replace('!!METHODS!!', method)
         # hardware
-        thwmin = ascii(response[hwmin])
+        thwmin = ascii(o2l(response[hwmin]))
         if len(thwmin.strip()) == 0:
             thwmin = 'No specific computer hardware is required.'
-        thwrec = ascii(response[hwrec])
+        thwrec = ascii(o2l(response[hwrec]))
         if len(thwrec) > 0:
             thwrec = '\\subsubsection{Recommended computer hardware}\n\n' + thwrec
         outline = outline.replace('!!HARDWARE!!', thwmin + thwrec)                
@@ -404,18 +414,18 @@ for index, response in data.iterrows():
         else:
             outline = outline.replace('!!ADMIN!!', '')
         # software 
-        tswmin = ascii(response[swmin])
+        tswmin = ascii(o2l(response[swmin]))
         if len(tswmin.strip()) == 0:
             tswmin = 'No specific software, operating system, or online service is required.'    
-        tswrec = ascii(response[swrec])
+        tswrec = ascii(o2l(response[swrec]))
         if len(tswrec.strip()) > 0:
             tswrec = '\\subsubsection{Recommended software and services}\n\n' + tswrec
         outline = outline.replace('!!SOFTWARE!!', tswmin + tswrec)        
         # internet
-        timin = ascii(response[imin])
+        timin = ascii(o2l(response[imin]))
         if len(timin.strip()) == 0:
             timin = 'There are no specific requirements regarding the type of internet connection for this course.'        
-        tirec = ascii(response[irec])
+        tirec = ascii(o2l(response[irec]))
         if len(tirec) > 0:
             tirec = '\\subsubsection{Recommended internet connection}\n\n' + tirec         
         outline = outline.replace('!!INTERNET!!', timin + tirec)
