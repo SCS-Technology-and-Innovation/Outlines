@@ -146,18 +146,22 @@ def group(line):
 
 # load the course information sheet
 info = pd.read_csv('courses.csv')
+
+TAdef = 'Teaching_Assistants.xlsx'
+TAfile = { 'Summer 2023': 'Teaching_Assistants_Summer23.xlsx'}
 TAsheet = { 'Fall 2022': 'TAs_fall_2022',
-            'Winter 2023': 'TAs_winter_2023' }
+            'Winter 2023': 'TAs_winter_2023',
+            'Summer 2023': 'TAs_Summer_2023' }            
 
 # load the TA information
 from collections import defaultdict
 assistant = defaultdict(list)
-TAinfo = pd.ExcelFile('Teaching_Assistants.xlsx')
 for term in TAsheet:
+    TAinfo = pd.ExcelFile(TAfile.get(term, TAdef))
     TAs  = TAinfo.parse(TAsheet[term])
     TAh = [h.strip() for h in TAs.columns.values.tolist()]
-    tacl = TAh.index('Course')
-    tacn = TAh.index('Code')
+    tacl = TAh.index('Course') if 'Course' in TAh else TAh.index('Course code')
+    tacn = TAh.index('Code') if 'Code' in TAh else TAh.index('Course number')
     tas = TAh.index('Section')
     tat = TAh.index('Teaching/Course Assistant')
     tan = TAh.index('Candidate')
