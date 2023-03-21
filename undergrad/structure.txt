@@ -1,0 +1,39 @@
+1;core;;Programming;CCCS 300;CIT,AC
+2;core;;Operating Systems;CCCS 321;CIT,AC
+3;core;;Computer Networks;CCCS 431;CIT,AC
+4;core;;Information Security;CMIS 422;CIT,AC
+
+5;dev;1,2,3,4;Software Design;CCCS 301;CIT
+6;dev;1,2;Algorithms;CCCS 315;CIT
+7;dev;1;Computational Mathematics;new;
+
+8;hack;1,2,3,4;Access Control;CCCS 450;AC
+9;hack;2,3,4;
+10;hack;1,2,3,4;Intrusion Testing;CCCS 455;AC
+
+11;policy;2,3,4;Security Risk Management;CCCS 453;AC
+12;policy;2,3,4;Incident Response & Recovery;CCCS 454;AC
+13;policy;2,3,4;Data Governance;new;
+
+14;cloud;1,2;Databases;CCCS 3330;CIT
+15;cloud;1,2,3;Cloud Computing;new;
+16;cloud;1,2,3;Data Engineering;new;
+
+17;web;Web Services;CCCS 425;CIT
+18;web;Front-End Web Development;CCCS 310;CIT
+19;web;Back-End Web Development
+
+20;mobile;Wireless Networks;CCCS 451;AC
+21;mobile;Mobile Computing;CCCS 325;CIT
+22;mobile;Wearable Technologies;new;
+
+23;ux;Usability;new;
+24;ux;Accessibility;new;
+25;ux;User Interface Design;new;
+
+#ux;User Experience
+#mobile;Mobile Devices
+#web;Web Development
+#policy;Security Policy
+#hack;Cybersecurity Tools
+#dev;Software Developmentxsx

@@ -148,7 +148,7 @@ def group(line):
 info = pd.read_csv('courses.csv')
 
 TAdef = 'Teaching_Assistants.xlsx'
-TAfile = { 'Summer 2023': 'Teaching_Assistants_Summer23.xlsx'}
+TAfile = { 'Summer 2023': 'Teaching_Assistants_S23.xlsx'}
 TAsheet = { 'Fall 2022': 'TAs_fall_2022',
             'Winter 2023': 'TAs_winter_2023',
             'Summer 2023': 'TAs_Summer_2023' }            
@@ -161,7 +161,7 @@ for term in TAsheet:
     TAs  = TAinfo.parse(TAsheet[term])
     TAh = [h.strip() for h in TAs.columns.values.tolist()]
     tacl = TAh.index('Course') if 'Course' in TAh else TAh.index('Course code')
-    tacn = TAh.index('Code') if 'Code' in TAh else TAh.index('Course number')
+    tacn = TAh.index('Code') if 'Code' in TAh else TAh.index('Number')
     tas = TAh.index('Section')
     tat = TAh.index('Teaching/Course Assistant')
     tan = TAh.index('Candidate')
@@ -217,10 +217,11 @@ ADMIN = 'administrative account'
 IMIN = 'required minimum internet connection specifications'
 IREC = 'recommended internet connection specifications'
 
+fixed = 'Summer 23'
 if fixed is None:            
     when = header.index('term')
-    
-t = header.index('course title')
+
+t = header.index('course title') 
 n = header.index('course number')
 s = header.index('section number')
 prof = header.index('instructor(s)')
@@ -325,8 +326,11 @@ for index, response in data.iterrows():
         while len(section) < 3:
             section = '0' + section
         if len(code) != 7:
-            print(f'Wrong code length, skipping {code} {section}')
-            continue
+            print(f'Wrong code length, making {code} {section} into TEST123-000')
+            lettercode = 'TEST'
+            numbercode = '123'
+            code = lettercode + numbercode
+            section = '000'
         output = f'{shortterm}-{code}-{section}.tex'
         if exists(output):
             print('Reprocessing', output)
