@@ -222,7 +222,8 @@ if fixed is None:
     when = header.index('term')
 
 t = header.index('course title') 
-n = header.index('course number')
+n = header.index('course number') if 'course number' in header \
+    else header.index('title') # sharepoint
 s = header.index('section number')
 prof = header.index('instructor(s)')
 h = header.index('office hours')
@@ -437,11 +438,15 @@ for index, response in data.iterrows():
         if len(tirec) > 0:
             tirec = '\\subsubsection{Recommended internet connection}\n\n' + tirec         
         outline = outline.replace('!!INTERNET!!', timin + tirec)
+
         # READINGS
         required = ascii(str(response[req]))
         if len(required) == 0:
-            required = 'Readings and assignments provided through myCourses'
+            required = '\\subsection{Readings}Readings and assignments provided through myCourses.'
+        else:
+            required = f'\\subsection{{Required Readings}}\n\n{required}\n'
         outline = outline.replace('!!READINGS!!', required)
+
         optional = ascii(str(response[opt]))
         if len(optional) > 0:
             optional = f'\\subsection{{Optional Materials}}\n\n{optional}\n'
