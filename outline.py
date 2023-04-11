@@ -130,18 +130,27 @@ def contact(text):
             clean.append(word)
     return ' '.join(clean)
 
+def notanumber(s): # alejandro's fake line breaks
+    return not s.split()[0].isdigit()
+
 def group(line):
     line = line.strip()
     if len(line) > 0 and line[0] == line[-1] and line[0] == '"':
         line = line[1:-1]
     lines = []
     for entry in line.split('\n'):
+        if len(entry) == 0:
+            continue
         cols = entry.split(';')
-        while len(cols) < 4:
-            cols.append('') # empty missing columns
-        lines.append(cols)
-    if debug:
-        print(lines)
+        if len(cols) > 0:
+            if notanumber(cols[0]):
+                if len(lines) > 0: # somewhere to append
+                    while len(cols) > 0 and notanumber(cols[0]):
+                        lines[-1][-1] += ' ' + cols.pop(0)
+                    if len(cols) > 0: # the last two columns (hours and minutes)
+                        lines[-1] += cols
+            else:
+                lines.append(cols)
     return lines
 
 # load the course information sheet
