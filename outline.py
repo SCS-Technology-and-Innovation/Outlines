@@ -108,7 +108,7 @@ def ascii(text):
             words.append(word)
         clean.append(' '.join(words))
     joint = '\n'.join(clean)
-    return joint.replace('. ', '.\n\n') # paragraphs
+    return joint.replace('.  ', '.\n\n') # paragraphs
 
 def contact(text):
     clean = []
@@ -232,7 +232,7 @@ if fixed is None:
 
 t = header.index('course title') 
 n = header.index('course number') if 'course number' in header \
-    else header.index('title') # sharepoint
+    else (header.index('title') if 'title' in header else header.index('titre')) # sharepoint likes to be french, sometimes
 s = header.index('section number')
 prof = header.index('instructor(s)')
 h = header.index('office hours')
