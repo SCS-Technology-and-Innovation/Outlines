@@ -132,6 +132,7 @@ schedule = {
     "CCCS 690" : "S24", # T&I teaching plan
     "CMIS 530" : "S23", # T&I teaching plan
     "CMIS 549" : "F23", # T&I teaching plan
+    'CMIS 543': 'F23', # Suggestion from Elisa
     'CMS2 627' : 'F23' # asked John
 }
 
@@ -165,7 +166,10 @@ def match(course, patterns):
         if p in course:
             return True
     return False
-                
+
+from collections import defaultdict
+needs = defaultdict(set)
+
 def printout(label, name, passed, email, dipl):
     content = template.replace('!!NAME!!', name)
     content = content.replace('!!SID!!', f'McGill Student ID {label}')
@@ -173,6 +177,7 @@ def printout(label, name, passed, email, dipl):
     content = content.replace('!!DIPL!!', names[dipl])
     content = content.replace('!!APC!!', APC[dipl])
     # when to take the missing courses
+    #print(passed)
     status = { course : course in passed for course in required[dipl] }
     total = len(status)
     completed = sum(status.values())
@@ -186,14 +191,16 @@ def printout(label, name, passed, email, dipl):
         mis = str(missing) if missing < 10 else 'any'
         listing = f'You have not yet completed {mis} course{pl} from the diploma.\n\\begin{{enumerate}}[noitemsep,topsep=0pt]\n'
         available = set()
+        #print(status)
         for (course, ok) in status.items():
             when = ''
             if ok: # already passed
                 available.add(course)
             else: # not yet passed
+                needs[course].add(label)
                 when = schedule.get(course, None)
                 if when is None:
-                    subs = transfers.get(course, set())
+                    subs = suggestions.get(course, set())
                     opt = ''
                     for sub in subs:
                         when = schedule.get(sub, None)
@@ -280,27 +287,38 @@ import pandas as pd
 
 records = dict()
 emails = dict()
+activity = defaultdict(set)
+
+recent = [ 2022, 2023 ]
+
+def active(termcodes):
+    for term in termcodes:
+        for tok in recent:
+            if str(tok) in str(term):
+                return True
+    return False
 
 for dataset in files:
     data = pd.ExcelFile(files[dataset])
-    students  = data.parse(data.sheet_names[0])
+    students  = data.parse(data.sheet_names[0]) 
     for index, row in students.iterrows():
-        email = str(row[-9])
+        email = str(row[3])
         studentID = str(row[0])
         if studentID not in emails and email != 'nan':
             emails[studentID] = email
         if len(studentID) == 9:
             if studentID not in records:
-                fullname = row[3].split('/')
+                fullname = row[1].split('/')
                 lastName = fullname[0] 
                 firstName = fullname[1]
                 name = f'{firstName} {lastName}'
                 names[studentID] = name
                 records[studentID] = set()
-            letterCode = row[5]
-            numberCode = int(row[7])
+            letterCode = row[10]
+            numberCode = int(row[11])
             courseCode = f'{letterCode} {numberCode:03d}'
-            finalGrade = str(row[35])
+            finalGrade = str(row[14])
+            activity[studentID].add(row[2])
             if passing(finalGrade):
                 records[studentID].add(courseCode)
                 # print(studentID, courseCode, finalGrade)
@@ -308,5 +326,19 @@ for dataset in files:
             if debug:
                 print('ignoring', studentID)
 
+
+
+actives = 0
+                
 for student in records:
-    printout(student, names[student], records[student], emails.get(student, ''), dataset)
+    if active(activity[student]):
+        printout(student, names[student], records[student], emails.get(student, ''), dataset)
+        actives += 1
+    else:
+        print(student, 'inactive')
+
+print(actives, 'active students')
+for course in needs:
+    print(len(needs[course]), 'students still need', course)
+#    for student in needs[course]:
+#        print(course, student)
