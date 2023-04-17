@@ -182,9 +182,11 @@ def printout(label, name, passed, email, dipl):
     total = len(status)
     completed = sum(status.values())
     missing = total - completed
-    if debug and missing == 10:
-        print(label, 'has no completed courses')        
+    if missing == 10:
+        print(label, 'has not completed any courses')
+        return
     if missing == 0: # ready to graduate, no need for a studyplan
+        print(label, 'has completed the diploma')
         return
     else:
         pl = 's' if missing > 1 else ''
