@@ -61,7 +61,10 @@ locations = { 'datasci.html' :
               'compit.html' : PREFIX + '134',
               'busint.html': PREFIX + '106',
               'busana.html' :
-              'https://www.mcgill.ca/continuingstudies/program/professional-development-certificate-business-analysis'}
+              'https://www.mcgill.ca/continuingstudies/program/professional-development-certificate-business-analysis',
+              'summer.html':
+              'https://continuingstudies.mcgill.ca/public/category/programArea.do?method=load&selectedProgramAreaId=17721'              
+             }
 
 skip = [ 'https://www.mcgill.ca/continuingstudies/registration',
          'https://mcgill.ca/continuingstudies/registration', 
@@ -81,6 +84,8 @@ for listing in locations:
     with open(listing) as source:
         text = source.read()
     soup = BeautifulSoup(text, 'html.parser')
+    for course in soup.find_all('td', { 'class' : 'course' }):
+        print('SSL mess', course) # summer courses not working yet, the server is not properly set up
     if 'timetable' in locations[listing]:
         content = soup.find('div', { 'class' : 'container body-content' })
         for row in content.find_all('tr'):

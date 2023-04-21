@@ -1,4 +1,4 @@
-term=W23
+term=S23
 if grep -q ListSchema sharepoint.csv; then
     sed '1d' sharepoint.csv > tmp
     mv tmp sharepoint.csv

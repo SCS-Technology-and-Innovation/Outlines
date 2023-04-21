@@ -107,7 +107,11 @@ def ascii(text):
                     word = f'\\url{{{word}}}'
             words.append(word)
         clean.append(' '.join(words))
-    joint = '\n'.join(clean)
+    joint = '\n'.join(clean).strip().lstrip()
+    if len(joint) == 0:
+        return ''
+    if joint[0] == '"' and joint[-1] == '"':
+        joint = joint[1:-1]
     return joint.replace('.  ', '.\n\n') # paragraphs
 
 def contact(text):
@@ -175,6 +179,7 @@ for term in TAsheet:
     tat = TAh.index('Teaching/Course Assistant')
     tan = TAh.index('Candidate')
     te = TAh.index('McGill Email')
+    tok = TAh.index('Workday Status')
     for index, row in TAs.iterrows():
         name = row[tan]
         email = str(row[te]).lstrip().strip()
@@ -185,7 +190,10 @@ for term in TAsheet:
         if not isinstance(name, str):
             break
         name = name.lstrip().strip()
-        code = row[tacl].strip()
+        code = str(row[tacl]).strip()
+        if len(code) != 4:
+            print('Invalid course code', code)
+            continue
         number = int(row[tacn])
         section = int(row[tas])
         kind = row[tat]
@@ -195,10 +203,11 @@ for term in TAsheet:
         if 'low registration' in name:
             continue
         details = f'\item[{ast}]{{{name} {email}}}'
-        print(term, code, number, section, details)
+        print(term, code, number, section, details, tok)
         number = '{:03d}'.format(number)
         section = '{:03d}'.format(section)
-        assistant[f'{term} {code} {number} {section}'].append(details)
+        if tok == 'hired':
+            assistant[f'{term} {code} {number} {section}'].append(details)
 
 allbymyself = [ '' ] # no TA, no CA (say nothing for now)
     
@@ -511,6 +520,7 @@ for index, response in data.iterrows():
         items = '\\\\\n\\hline\n'.join([ f'{ip} & {it} & {idl} & {idesc}' for (ip, it, idl, idesc) in assessments ])
         outline = outline.replace('!!ITEMS!!', items)
         sessions = [ ascii(response[header.index(f'session {k}')]) for k in range(1, 14) ]
+        sessions = [ s.strip() for s in sessions ]
         content = '\n'.join([ f'\\item{{{ascii(r)}}}' if len(r) > 0 else '' for r in sessions ])
         outline = outline.replace('\\item{!!CONTENT!!}', ascii(content))
         outline = outline.replace('!!INFO!!', '\\textcolor{blue}{Complementary information to be inserted soon.}')    
