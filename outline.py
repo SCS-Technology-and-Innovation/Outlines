@@ -206,7 +206,7 @@ for term in TAsheet:
         print(term, code, number, section, details, tok)
         number = '{:03d}'.format(number)
         section = '{:03d}'.format(section)
-        if tok == 'hired':
+        if tok == 'hired' or tok == 'offer sent':
             assistant[f'{term} {code} {number} {section}'].append(details)
 
 allbymyself = [ '' ] # no TA, no CA (say nothing for now)
