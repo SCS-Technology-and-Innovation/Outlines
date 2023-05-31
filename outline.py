@@ -244,7 +244,7 @@ n = header.index('course number') if 'course number' in header \
     else (header.index('title') if 'title' in header else header.index('titre')) # sharepoint likes to be french, sometimes
 s = header.index('section number')
 prof = header.index('instructor(s)')
-h = header.index('office hours')
+oh = header.index('office hours')
 d = header.index('course description')
 o = header.index('learning outcomes')
 req = header.index('required readings')
@@ -360,7 +360,7 @@ for index, response in data.iterrows():
         outline = outline.replace('!!CODE!!', code)
         outline = outline.replace('!!SECTION!!', section)
         outline = outline.replace('!!INSTRUCTOR!!', contact(response[prof].strip())) # instructor
-        hours = response.get(h, '')
+        hours = response.get(oh, '')
         if len(hours) == 0:
             hours = 'Upon request'
         outline = outline.replace('!!HOURS!!', hours.strip())
