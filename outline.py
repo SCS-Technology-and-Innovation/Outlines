@@ -8,13 +8,13 @@ from os.path import exists
 skip = False # hey yaz
 debug = False
 THRESHOLD = 0.05
-DEFAULT = 'This course consists of a community of learners of which you are an
+DEFAULT = '''This course consists of a community of learners of which you are an
 integral member; your active participation is therefore essential to
 its success. This may include elements such as reviewing class
 content, visiting myCourses, carrying out readings and exercises,
 including group work and study groups, and engaging in discussions or
 other activities with the instructional team and/or the other
-participants, synchronously or asynchronously.'
+participants, synchronously or asynchronously.'''
 
 wrong = set()
 
