@@ -8,7 +8,13 @@ from os.path import exists
 skip = False # hey yaz
 debug = False
 THRESHOLD = 0.05
-DEFAULT = 'This course consists of a community of learners of which you are an integral member; your active participation is therefore essential to its success. This means: attending class; visiting myCourses, doing the assigned readings/exercises before class; and engaging in class discussions/activities.'
+DEFAULT = 'This course consists of a community of learners of which you are an
+integral member; your active participation is therefore essential to
+its success. This may include elements such as reviewing class
+content, visiting myCourses, carrying out readings and exercises,
+including group work and study groups, and engaging in discussions or
+other activities with the instructional team and/or the other
+participants, synchronously or asynchronously.'
 
 wrong = set()
 
@@ -244,7 +250,7 @@ n = header.index('course number') if 'course number' in header \
     else (header.index('title') if 'title' in header else header.index('titre')) # sharepoint likes to be french, sometimes
 s = header.index('section number')
 prof = header.index('instructor(s)')
-h = header.index('office hours')
+oh = header.index('office hours')
 d = header.index('course description')
 o = header.index('learning outcomes')
 req = header.index('required readings')
@@ -360,7 +366,7 @@ for index, response in data.iterrows():
         outline = outline.replace('!!CODE!!', code)
         outline = outline.replace('!!SECTION!!', section)
         outline = outline.replace('!!INSTRUCTOR!!', contact(response[prof].strip())) # instructor
-        hours = response.get(h, '')
+        hours = response.get(oh, '')
         if len(hours) == 0:
             hours = 'Upon request'
         outline = outline.replace('!!HOURS!!', hours.strip())
@@ -521,7 +527,7 @@ for index, response in data.iterrows():
             error = f'\nParsing identified {total} percent for the grade instead of 100 percent.'
         items = '\\\\\n\\hline\n'.join([ f'{ip} & {it} & {idl} & {idesc}' for (ip, it, idl, idesc) in assessments ])
         outline = outline.replace('!!ITEMS!!', items)
-        sessions = [ ascii(response[header.index(f'session {k}')]) for k in range(1, 14) ]
+        sessions = [ ascii(response[header.index(f's{k}')]) for k in range(1, 16) ] # at most 15 sessions as of now (Nabil and Diana Oka)
         sessions = [ s.strip() for s in sessions ]
         content = '\n'.join([ f'\\item{{{ascii(r)}}}' if len(r) > 0 else '' for r in sessions ])
         outline = outline.replace('\\item{!!CONTENT!!}', ascii(content))
