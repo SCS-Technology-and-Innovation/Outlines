@@ -431,6 +431,7 @@ for index, response in data.iterrows():
         thwmin = ascii(o2l(response[hwmin]))
         if len(thwmin.strip()) == 0:
             thwmin = 'No specific computer hardware is required.'
+        thwmin = '\\subsubsection{Required computer hardware}\n\n' + thwmin            
         thwrec = ascii(o2l(response[hwrec]))
         if len(thwrec) > 0:
             thwrec = '\\subsubsection{Recommended computer hardware}\n\n' + thwrec
@@ -443,7 +444,8 @@ for index, response in data.iterrows():
         # software 
         tswmin = ascii(o2l(response[swmin]))
         if len(tswmin.strip()) == 0:
-            tswmin = 'No specific software, operating system, or online service is required.'    
+            tswmin = 'No specific software, operating system, or online service is required.'
+        tswmin = '\\subsubsection{Required software and services}\n\n' + tswmin
         tswrec = ascii(o2l(response[swrec]))
         if len(tswrec.strip()) > 0:
             tswrec = '\\subsubsection{Recommended software and services}\n\n' + tswrec
