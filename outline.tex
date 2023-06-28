@@ -8,6 +8,7 @@
 \usepackage{helvet}
 \usepackage{setspace}
 \usepackage{graphicx}
+\usepackage{longtable}
 
 \PassOptionsToPackage{hyphens}{url}
 \usepackage[hidelinks]{hyperref}
@@ -70,7 +71,23 @@
 
 \end{description}
 
-Note that, in accordance with McGill University’s official email
+
+\vfill
+
+\hrule
+ 
+{\em The official version of this course outline is the version posted
+  on myCourses on the day of the first class session.}
+
+{\em In the event of extraordinary circumstances beyond the
+  University's control, the content and/or evaluation scheme in this
+  course is subject to change.}
+
+\newpage
+
+\paragraph{Note on email policy}
+
+In accordance with McGill University’s official email
 policy, the instructor {\em will not respond} to email messages sent
 from {\bf outside} the McGill network (e.g., gmail or hotmail). As
 well, while instructors appreciate that email correspondence is an
@@ -88,18 +105,6 @@ the class. Generally speaking, during the week, a valid request
 submitted via e-mail will receive a response within 36 hours,
 exclusive of weekends and statutory holidays.
 
-\vfill
-
-\hrule
- 
-{\em The official version of this course outline is the version posted
-  on myCourses on the day of the first class session.}
-
-{\em In the event of extraordinary circumstances beyond the
-  University's control, the content and/or evaluation scheme in this
-  course is subject to change.}
-
-
 \newpage
 
 \subsection{Evaluation}
@@ -107,14 +112,14 @@ exclusive of weekends and statutory holidays.
 
 \begin{center}
   \renewcommand{\arraystretch}{1.2}
-\scalebox{0.9}{
-  \begin{tabular}{|r|>{\raggedright}p{40mm}|>{\raggedright}p{30mm}|p{103mm}|}
+  \begin{longtable}{|r|>{\raggedright}p{40mm}|>{\raggedright}p{30mm}|p{80mm}|}
     \hline
-    {\bf \%} & {\bf Item} & {\bf Deadline} & {\bf Description} \\
-    \hline
-    !!ITEMS!! \\
-    \hline
-\end{tabular}}
+        {\bf \%} & {\bf Item} & {\bf Deadline} & {\bf Description} \\
+        \hline
+        \endhead        
+        !!ITEMS!! \\
+        \hline
+  \end{longtable}
 \end{center}
 
 \newpage

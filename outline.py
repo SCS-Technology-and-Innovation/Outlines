@@ -18,27 +18,38 @@ participants, synchronously or asynchronously.'''
 
 wrong = set()
 
+def unquote(text):
+    while True:
+        if text is None or len(text) == 0:
+            return ''
+        text = text.strip()
+        if len(text) > 1 and text[0] == '"' and text[-1] == '"':
+            text = text[1:-1]
+        else:
+            return text
+
 def o2l(t):
     if ";" not in t:
         return t
     s = '#s#\n'
     for part in t.split(';'):
-        part = part.strip()
+        part = unquote(part.strip())
         if len(part) > 0:
             s += '#i# ' + part + '\n'
     return s + '#e#';
 
 def capsfix(text):
     words = text.split()
-    fixed = []
+    fix = []
     for word in words:
         if word.isupper():
-            fixed.append(word.capitalize())
+            fix.append(word.capitalize())
         else:
-            fixed.append(word)
-    return ' '.join(fixed)
+            fix.append(word)
+    return ' '.join(fix)
 
 def ascii(text):
+    text = unquote(text)
     text = text.replace('%23', '#') # sharepoint export breaks the #    
 
     text = text.replace('á', "\\'{a}")
@@ -224,13 +235,11 @@ with open('outline.tex') as source:
 # load the outline responses
 data = None
 from sys import argv
-fixed = None
 if 'sharepoint' not in argv:
     responses = pd.ExcelFile('outline.xlsx')
     data  = responses.parse(responses.sheet_names[0])
 else:
     data = pd.read_csv('sharepoint.csv', header = [0], engine = 'python')
-    fixed = 'Summer 2023'
 
 header = [h.strip().lower() for h in data.columns.values.tolist()]
 HWMIN = 'required minimum computer hardware specifications'
@@ -241,13 +250,17 @@ ADMIN = 'administrative account'
 IMIN = 'required minimum internet connection specifications'
 IREC = 'recommended internet connection specifications'
 
-fixed = 'Summer 23'
-if fixed is None:            
-    when = header.index('term')
 
+fixed = 'Fall 23'
+when = None
+if 'term' in header: 
+    when = header.index('term')
+    
 t = header.index('course title') 
+# sharepoint likes to be french, sometimes
 n = header.index('course number') if 'course number' in header \
-    else (header.index('title') if 'title' in header else header.index('titre')) # sharepoint likes to be french, sometimes
+    else (header.index('title') if 'title' in header else header.index('titre'))
+
 s = header.index('section number')
 prof = header.index('instructor(s)')
 oh = header.index('office hours')
@@ -301,7 +314,7 @@ for index, response in data.iterrows():
     assert lr == hl # multiline bug detection 
     error = ''
     # when is this taught
-    term = fixed if fixed is not None else response[when].strip() 
+    term = response[when].strip() if when is not None else fixed
     if term == '':
         term = 'Fall 2022' # default since we did not ask for the term in the start
     shortterm = term[0] + term[-2:]
@@ -361,7 +374,8 @@ for index, response in data.iterrows():
             print('Reprocessing', output)
         else:
             print('Processing', output)
-        ct = ascii(response[t]) # course title            
+        ct = ascii(response[t]) # course title
+        print('HERE', ct)
         outline = outline.replace('!!NAME!!', capsfix(ct))
         outline = outline.replace('!!CODE!!', code)
         outline = outline.replace('!!SECTION!!', section)
@@ -392,8 +406,10 @@ for index, response in data.iterrows():
                 outline = outline.replace('!!COREQ!!', 'No co-requisites')
             else:
                 outline = outline.replace('!!COREQ!!', coreq)
-            amount = additionalDetails['Credit amount'].iloc[0]
-            amount = round(int(amount)) # no .0
+            amount = float(additionalDetails['Credit amount'].iloc[0])
+            amount = '{:.1f}'.format(amount)
+            if '0' == amount[-1]:
+                amount = amount[:-2] # no .0
             kind = ''
             if additionalDetails['Credit type'].iloc[0] == 'credits':
                 if graduate:
@@ -426,7 +442,7 @@ for index, response in data.iterrows():
             else:
                 h = round(int(h)) # no .0
                 outline = outline.replace('!!ASSIGNMENT!!',
-                                          f'\\item[Independent study hours]{{Approximately {h} hours }}')
+                                          f'\\item[Independent study hours]{{Approximately {h} hours in total}}')
         outline = outline.replace('!!DESCRIPTION!!', ascii(response[d]))
         outline = outline.replace('!!OUTCOMES!!', ascii(response[o]))
         method = ascii(str(response[m]))
@@ -475,8 +491,8 @@ for index, response in data.iterrows():
 
         optional = ascii(str(response[opt]))
         if len(optional) > 0:
-            optional = f'\\subsection{{Optional Materials}}\n\n{optional}\n'
-        outline = outline.replace('!!OPTIONAL!!', optional)
+            optional = f'\\subsection{{Optional Materials}}\n\n{optional}\n\\newpage'
+        outline = outline.replace('!!OPTIONAL!!' , optional)
 
         # ADDITIONAL INFO
         ai = ascii(response[adinfo])
