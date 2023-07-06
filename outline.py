@@ -31,7 +31,7 @@ def unquote(text):
 def o2l(t):
     if ";" not in t:
         return t
-    s = '#s#\n'
+    s = '\\vspace*{-2mm}#s#\n'
     for part in t.split(';'):
         part = unquote(part.strip())
         if len(part) > 0:
@@ -129,7 +129,10 @@ def ascii(text):
         return ''
     if joint[0] == '"' and joint[-1] == '"':
         joint = joint[1:-1]
-    return joint.replace('.  ', '.\n\n') # paragraphs
+    joint = joint.replace('.  ', '.\n\n') # paragraphs
+    if joint[:7] == '\\begin{': # starts with a bulleted list
+        joint = '\phantom{skip}\\\\\\vspace*{-4mm}' + joint
+    return joint
 
 def contact(text):
     clean = []
