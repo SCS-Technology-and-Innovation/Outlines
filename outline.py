@@ -399,8 +399,7 @@ for index, response in data.iterrows():
             print('Reprocessing', output)
         else:
             print('Processing', output)
-        ct = ascii(response[t]) # course title
-        print('HERE', ct)
+        ct = ascii(response[t]).lower().title() # course title
         outline = outline.replace('!!NAME!!', capsfix(ct))
         outline = outline.replace('!!CODE!!', code)
         outline = outline.replace('!!SECTION!!', section)
