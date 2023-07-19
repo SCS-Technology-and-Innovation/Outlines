@@ -186,6 +186,28 @@ TAsheet = { 'Fall 2022': 'TAs_fall_2022',
             'Winter 2023': 'TAs_winter_2023',
             'Summer 2023': 'TAs_Summer_2023' }            
 
+def cleanterm(s):
+    s = s.strip()
+    if len(s) == 0:
+        return ''
+    c = ''
+    if 'summer' in s.lower() or 'spring' in s.lower():
+        c = 'Summer '
+    elif 'winter' in s.lower():
+        c = 'Winter '
+    elif 'fall' in s.lower() or 'autumn' in s.lower():
+        c = 'Fall '
+    else:
+        print(s, 'is not a valid term')
+        quit()
+    digits = ''.join(i for i in s if i.isdigit())
+    if len(digits) == 2:
+        digits = '20' + digits
+    if len(digits) != 4:
+        print(digits, 'is not a valid year')
+        quit()
+    return c + digits
+
 # load the TA information
 from collections import defaultdict
 assistant = defaultdict(list)
@@ -317,9 +339,9 @@ for index, response in data.iterrows():
     assert lr == hl # multiline bug detection 
     error = ''
     # when is this taught
-    term = response[when].strip() if when is not None else fixed
+    term = cleanterm(response[when].strip()) if when is not None else fixed
     if term == '':
-        term = 'Fall 2022' # default since we did not ask for the term in the start
+        term = 'Fall 2023' # default since we did not ask for the term in the start
     shortterm = term[0] + term[-2:]
     code = response[n].strip() # course number
     code = code.replace('-', ' ') # for Hugue
