@@ -303,7 +303,9 @@ hl = len(header)
 
 for i in range(hl):
     current = header[i]
-    if 'admin' in current.lower():
+    if 'session' in current.lower():
+        header[i] = current.lower().replace('session', 's').replace(' ', '')
+    elif 'admin' in current.lower():
         header[i] = ADMIN
     elif 'hardware' in current:
         if 'minimum' in current:
@@ -343,7 +345,7 @@ for index, response in data.iterrows():
     if term == '':
         term = 'Fall 2023' # default since we did not ask for the term in the start
     shortterm = term[0] + term[-2:]
-    code = response[n].strip() # course number
+    code = response[n].strip().lstrip() # course number
     code = code.replace('-', ' ') # for Hugue
     code = ' '.join(code.split()) # also for Hugue
     if len(code) < 3:
@@ -371,7 +373,7 @@ for index, response in data.iterrows():
         lettercode = parts.pop(0)
         numbercode = parts.pop(0)
     else:
-        lettercode = code[:3]
+        lettercode = code[:4]
         numbercode = code[4:]
     if ',' in sections:
         sections = sections.replace(',', ' ')
