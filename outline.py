@@ -181,10 +181,14 @@ def group(line):
 info = pd.read_csv('courses.csv')
 
 TAdef = 'Teaching_Assistants.xlsx'
-TAfile = { 'Summer 2023': 'Teaching_Assistants_S23.xlsx'}
+TAfile = {
+    'Summer 2023': 'Teaching_Assistants_F23.xlsx',
+    'Fall 2023': 'Teaching_Assistants_F23.xlsx',
+}
 TAsheet = { 'Fall 2022': 'TAs_fall_2022',
             'Winter 2023': 'TAs_winter_2023',
-            'Summer 2023': 'TAs_Summer_2023' }            
+            'Summer 2023': 'TAs_Summer_2023',
+            'Fall 2023': 'TAs_Fall_2023'}            
 
 def cleanterm(s):
     s = s.strip()
@@ -216,7 +220,11 @@ for term in TAsheet:
     TAs  = TAinfo.parse(TAsheet[term])
     TAh = [h.strip() for h in TAs.columns.values.tolist()]
     tacl = TAh.index('Course') if 'Course' in TAh else TAh.index('Course code')
-    tacn = TAh.index('Code') if 'Code' in TAh else TAh.index('Number')
+    tacn = None
+    try:
+        tacn = TAh.index('Code') if 'Code' in TAh else TAh.index('Number')
+    except:
+        tacn = None
     tas = TAh.index('Section')
     tat = TAh.index('Teaching/Course Assistant')
     tan = TAh.index('Candidate')
@@ -228,15 +236,21 @@ for term in TAsheet:
         if '@' not in email:
             email = '' # blank out the unavailable
         else:
-            email = f'({email})'
+            email = f' ({email})'
         if not isinstance(name, str):
-            break
+            continue
         name = name.lstrip().strip()
-        code = str(row[tacl]).strip()
+        code = str(row[tacl]).strip().lstrip()
+        number = None
+        if len(code) > 4:
+            code = code.replace(' ', '')
+            number = int(code[4:])
+            code = code[:4]
         if len(code) != 4:
             print('Invalid course code', code)
             continue
-        number = int(row[tacn])
+        if number is None:
+            number = int(row[tacn])
         section = int(row[tas])
         kind = row[tat]
         ast = 'Teaching Assistant' if kind == 'TA' else 'Course Assistant'
@@ -244,11 +258,12 @@ for term in TAsheet:
             name = name.replace('TA 120', '')
         if 'low registration' in name:
             continue
-        details = f'\item[{ast}]{{{name} {email}}}'
-        print(term, code, number, section, details, tok)
+        details = f'\item[{ast}]{{{name}{email}}}'
         number = '{:03d}'.format(number)
         section = '{:03d}'.format(section)
-        if tok == 'hired' or tok == 'offer sent':
+        status = str(row[tok])
+        print(term, code, number, section, details, status)
+        if 'hired' in status or 'accepted' in status:
             assistant[f'{term} {code} {number} {section}'].append(details)
 
 allbymyself = [ '' ] # no TA, no CA (say nothing for now)
