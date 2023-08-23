@@ -100,10 +100,17 @@ def ascii(text):
     if '#i#' in text and '#s#' not in text:
         text = text.replace('#i#', '#s#\n#i#', 1) # just the first one
     if '#s#' in text and '#e#' not in text: # fix for reza
-        text = text + '\n#e#\n' # assume the list keeps going until the end            
+        text = text + '\n#e#\n' # assume the list keeps going until the end
+    if '#ns#' in text and '#ne#' not in text: # fix for reza
+        if '#e#' in text: # mismatch, maybe?
+            text = text.replace("#e#", '#ne');
+        else:
+            text = text + '\n#ne#\n' # assume the list keeps going until the end                   
     text = text.replace('#s#', '\n\\begin{itemize}')
+    text = text.replace('#ns#', '\n\\begin{enumerate}') # for sam
     text = text.replace('#i#', '\n\\item ')
     text = text.replace('#e#', '\n\\end{itemize}\n\n')
+    text = text.replace('#ne#', '\n\\end{enumerate}\n\n')
     if '&' in text and '\\&' not in text:
         text = text.replace('&', '\\&') # LaTeX not accounted for
     if '%' in text and '\\%' not in text:
