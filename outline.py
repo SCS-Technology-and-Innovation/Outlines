@@ -198,9 +198,21 @@ TAsheet = { 'Fall 2022': 'TAs_fall_2022',
             'Fall 2023': 'TAs_Fall_2023'}            
 
 def cleanterm(s):
-    s = s.strip()
+    s = s.strip().lstrip()
     if len(s) == 0:
         return ''
+    if '20' in s and len(s) == 6: # 202309 or similar
+        c = None
+        digits = s[:4]
+        t = s[4:]
+        if t == '09':
+            c = 'Fall '
+        elif t == '01':
+            c = 'Winter '
+        elif t == '05':
+            c = 'Summer '
+        if c is not None:
+            return c + digits
     c = ''
     if 'summer' in s.lower() or 'spring' in s.lower():
         c = 'Summer '
