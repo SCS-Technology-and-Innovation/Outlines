@@ -103,7 +103,7 @@ def ascii(text):
         text = text + '\n#e#\n' # assume the list keeps going until the end
     if '#ns#' in text and '#ne#' not in text: # fix for reza
         if '#e#' in text: # mismatch, maybe?
-            text = text.replace("#e#", '#ne');
+            text = text.replace("#e#", '#ne#');
         else:
             text = text + '\n#ne#\n' # assume the list keeps going until the end                   
     text = text.replace('#s#', '\n\\begin{itemize}')
