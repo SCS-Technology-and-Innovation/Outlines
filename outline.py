@@ -1,3 +1,6 @@
+
+fixed = 'Winter 2024'
+
 # pip install pandas
 # pip install openpyxl
 import pandas as pd
@@ -96,9 +99,11 @@ def ascii(text):
 
     # a fix for jean-philippe
     text = text.replace('<', ' ')
-    text = text.replace('>', ' ')    
-    if '#i#' in text and '#s#' not in text:
-        text = text.replace('#i#', '#s#\n#i#', 1) # just the first one
+    text = text.replace('>', ' ')
+
+    if '#i#' in text:
+        if '#s#' not in text and '#ns#' not in text:
+            text = text.replace('#i#', '#s#\n#i#', 1) # just the first one, assume bullets
     if '#s#' in text and '#e#' not in text: # fix for reza
         text = text + '\n#e#\n' # assume the list keeps going until the end
     if '#ns#' in text and '#ne#' not in text: # fix for reza
@@ -106,11 +111,12 @@ def ascii(text):
             text = text.replace("#e#", '#ne#');
         else:
             text = text + '\n#ne#\n' # assume the list keeps going until the end                   
-    text = text.replace('#s#', '\n\\begin{itemize}')
+    
     text = text.replace('#ns#', '\n\\begin{enumerate}') # for sam
-    text = text.replace('#i#', '\n\\item ')
-    text = text.replace('#e#', '\n\\end{itemize}\n\n')
     text = text.replace('#ne#', '\n\\end{enumerate}\n\n')
+    text = text.replace('#s#', '\n\\begin{itemize}')
+    text = text.replace('#e#', '\n\\end{itemize}\n\n')
+    text = text.replace('#i#', '\n\\item ')
     if '&' in text and '\\&' not in text:
         text = text.replace('&', '\\&') # LaTeX not accounted for
     if '%' in text and '\\%' not in text:
@@ -195,14 +201,23 @@ TAfile = {
 TAsheet = { 'Fall 2022': 'TAs_fall_2022',
             'Winter 2023': 'TAs_winter_2023',
             'Summer 2023': 'TAs_Summer_2023',
-            'Fall 2023': 'TAs_Fall_2023'}            
+            'Fall 2023': 'TAs_Fall_2023' }            
 
 def cleanterm(s):
     s = s.strip().lstrip()
     if len(s) == 0:
-        return ''
-    if '20' in s and len(s) == 6: # 202309 or similar
-        c = None
+        return None
+    c = None
+    digits = None
+    if len(s) == 3:
+        if 'F' in s:
+            c = 'Fall'
+        elif 'W' in s:
+            c = 'Winter'
+        elif 'S' in s:
+            c = 'Summer'
+        digits = s[1:]
+    elif '20' in s and len(s) == 6: # 202309 or similar
         digits = s[:4]
         t = s[4:]
         if t == '09':
@@ -211,19 +226,18 @@ def cleanterm(s):
             c = 'Winter '
         elif t == '05':
             c = 'Summer '
-        if c is not None:
-            return c + digits
-    c = ''
-    if 'summer' in s.lower() or 'spring' in s.lower():
-        c = 'Summer '
-    elif 'winter' in s.lower():
-        c = 'Winter '
-    elif 'fall' in s.lower() or 'autumn' in s.lower():
-        c = 'Fall '
     else:
+        if 'summer' in s.lower() or 'spring' in s.lower():
+            c = 'Summer '
+        elif 'winter' in s.lower():
+            c = 'Winter '
+        elif 'fall' in s.lower() or 'autumn' in s.lower():
+            c = 'Fall '
+    if c is None:
         print(s, 'is not a valid term')
         quit()
-    digits = ''.join(i for i in s if i.isdigit())
+    if digits is None:
+        digits = ''.join(i for i in s if i.isdigit())
     if len(digits) == 2:
         digits = '20' + digits
     if len(digits) != 4:
@@ -310,7 +324,6 @@ IMIN = 'required minimum internet connection specifications'
 IREC = 'recommended internet connection specifications'
 
 
-fixed = 'Fall 23'
 when = None
 if 'term' in header: 
     when = header.index('term')
@@ -375,9 +388,9 @@ for index, response in data.iterrows():
     assert lr == hl # multiline bug detection 
     error = ''
     # when is this taught
-    term = cleanterm(response[when].strip()) if when is not None else fixed
-    if term == '':
-        term = 'Fall 2023' # default since we did not ask for the term in the start
+    term = cleanterm(response[when].strip()) if when is not None else None
+    if term is None:
+        term = fixed # default since we did not ask for the term in the start
     shortterm = term[0] + term[-2:]
     code = response[n].strip().lstrip() # course number
     code = code.replace('-', ' ') # for Hugue
