@@ -194,12 +194,9 @@ def group(line):
 info = pd.read_csv('courses.csv')
 
 TAdef = 'Teaching_Assistants.xlsx'
-TAfile = {
-    'Summer 2023': 'Teaching_Assistants_F23.xlsx',
-    'Fall 2023': 'Teaching_Assistants_F23.xlsx',
-}
 TAsheet = { 'Fall 2022': 'TAs_fall_2022',
             'Winter 2023': 'TAs_winter_2023',
+            'Winter 2024': 'TAs_Winter_2024',
             'Summer 2023': 'TAs_Summer_2023',
             'Fall 2023': 'TAs_Fall_2023' }            
 
@@ -249,8 +246,11 @@ def cleanterm(s):
 from collections import defaultdict
 assistant = defaultdict(list)
 for term in TAsheet:
-    TAinfo = pd.ExcelFile(TAfile.get(term, TAdef))
-    TAs  = TAinfo.parse(TAsheet[term])
+    TAinfo = pd.ExcelFile(TAdef)
+    try:
+        TAs  = TAinfo.parse(TAsheet[term])
+    except:
+        continue
     TAh = [h.strip() for h in TAs.columns.values.tolist()]
     tacl = TAh.index('Course') if 'Course' in TAh else TAh.index('Course code')
     tacn = None
@@ -289,15 +289,19 @@ for term in TAsheet:
         ast = 'Teaching Assistant' if kind == 'TA' else 'Course Assistant'
         if 'TA 120' in name:
             name = name.replace('TA 120', '')
-        if 'low registration' in name:
+        if 'TBC' in name:
+            name = '\\textcolor{red}{To be confirmed}'
+            email = ''
+        name = name.strip().lstrip()
+        if 'low registration' in name or len(name) == 0:
             continue
         details = f'\item[{ast}]{{{name}{email}}}'
         number = '{:03d}'.format(number)
         section = '{:03d}'.format(section)
         status = str(row[tok])
+        # if  'hired' in status or 'accepted' in status: # Nadia asked to disable this and go by the names
+        assistant[f'{term} {code} {number} {section}'].append(details)
         print(term, code, number, section, details, status)
-        if 'hired' in status or 'accepted' in status:
-            assistant[f'{term} {code} {number} {section}'].append(details)
 
 allbymyself = [ '' ] # no TA, no CA (say nothing for now)
     
