@@ -211,11 +211,11 @@ def cleanterm(s):
     digits = None
     if len(s) == 3:
         if 'F' in s:
-            c = 'Fall'
+            c = 'Fall '
         elif 'W' in s:
-            c = 'Winter'
+            c = 'Winter '
         elif 'S' in s:
-            c = 'Summer'
+            c = 'Summer '
         digits = s[1:]
     elif '20' in s and len(s) == 6: # 202309 or similar
         digits = s[:4]
