@@ -1,6 +1,3 @@
-
-fixed = 'Winter 2024'
-
 # pip install pandas
 # pip install openpyxl
 import pandas as pd
@@ -8,17 +5,25 @@ from math import fabs
 from datetime import datetime
 from os.path import exists
 
-skip = False # hey yaz
+
+# load the course information sheet
+info = pd.read_csv('courses.csv')
+TAdef = 'Teaching_Assistants.xlsx'
+
+# update the term here
+
+fixed = 'Summer 2024'
+TAsheet = {   'Fall 2022': 'TAs_fall_2022',
+            'Winter 2023': 'TAs_winter_2023',
+            'Winter 2024': 'TAs_Winter_2024',
+            'Summer 2023': 'TAs_Summer_2023',
+            'Summer 2024': 'TAs_Summer_2024',            
+              'Fall 2023': 'TAs_Fall_2023' } 
+
+
+skip = False 
 debug = False
 THRESHOLD = 0.05
-DEFAULT = '''This course consists of a community of learners of which you are an
-integral member; your active participation is therefore essential to
-its success. This may include elements such as reviewing class
-content, visiting myCourses, carrying out readings and exercises,
-including group work and study groups, and engaging in discussions or
-other activities with the instructional team and/or the other
-participants, synchronously or asynchronously.'''
-
 wrong = set()
 
 def unquote(text):
@@ -190,15 +195,6 @@ def group(line):
                 lines.append(cols)
     return lines
 
-# load the course information sheet
-info = pd.read_csv('courses.csv')
-
-TAdef = 'Teaching_Assistants.xlsx'
-TAsheet = { 'Fall 2022': 'TAs_fall_2022',
-            'Winter 2023': 'TAs_winter_2023',
-            'Winter 2024': 'TAs_Winter_2024',
-            'Summer 2023': 'TAs_Summer_2023',
-            'Fall 2023': 'TAs_Fall_2023' }            
 
 def cleanterm(s):
     s = s.strip().lstrip()
@@ -326,7 +322,6 @@ SWREC = 'recommended software and services'
 ADMIN = 'administrative account'
 IMIN = 'required minimum internet connection specifications'
 IREC = 'recommended internet connection specifications'
-
 
 when = None
 if 'term' in header: 
@@ -584,7 +579,7 @@ for index, response in data.iterrows():
             attendance = 0 # zero if blank    
         expl = ascii(response[e])
         if attendance > 0 and len(expl) == 0:
-            expl = DEFAULT
+            expl = '\\input{part.tex}'
         assessments = []
         if attendance > 0:
             assessments.append((attendance,
@@ -620,7 +615,8 @@ for index, response in data.iterrows():
             error = f'\nParsing identified {total} percent for the grade instead of 100 percent.'
         items = '\\\\\n\\hline\n'.join([ f'{ip} & {it} & {idl} & {idesc}' for (ip, it, idl, idesc) in assessments ])
         outline = outline.replace('!!ITEMS!!', items)
-        sessions = [ ascii(response[header.index(f's{k}')]) for k in range(1, 16) ] # at most 15 sessions as of now (Nabil and Diana Oka)
+        # at most 15 sessions as of now (Nabil and Diana Oka)
+        sessions = [ ascii(response[header.index(f's{k}')]) for k in range(1, 16) ] # <---- NEED MORE SESSIONS???
         sessions = [ s.strip() for s in sessions ]
         content = '\n'.join([ f'\\item{{{ascii(r)}}}' if len(r) > 0 else '' for r in sessions ])
         outline = outline.replace('\\item{!!CONTENT!!}', ascii(content))
