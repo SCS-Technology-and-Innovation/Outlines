@@ -211,6 +211,8 @@ def printout(label, name, passed, email, dipl):
                             opt += f'\item {sub} {names[sub]} which will be available for registration in {term}\n'
                     if opt != '':
                         listing += f'\\item {course} {{\\em {names[course]}}} can be substituted by\n\\begin{{itemize}}[noitemsep,topsep=0pt]\n' + opt + '\\end{itemize}\n'
+                        if '680' in opt:
+                            print('S24', email)
                     else:
                         error = f'ERROR: nothing scheduled for {course} {label} {email}'
                         print(error)
@@ -282,7 +284,7 @@ from sys import argv
 debug = 'debug' in argv
 
 files = {
-    'DDABI': 'digital.xlsx' # 'Students_pending_DiplomaDigAnalytics.xlsx' (new file from kevork)
+    'DDABI': 'digital.xlsx'
 }
 
 import pandas as pd
@@ -291,7 +293,7 @@ records = dict()
 emails = dict()
 activity = defaultdict(set)
 
-recent = [ 2022, 2023 ]
+recent = [ 2022, 2023, 2024 ]
 
 def active(termcodes):
     for term in termcodes:
@@ -300,27 +302,32 @@ def active(termcodes):
                 return True
     return False
 
+
 for dataset in files:
     data = pd.ExcelFile(files[dataset])
     students  = data.parse(data.sheet_names[0]) 
     for index, row in students.iterrows():
-        email = str(row[3])
+        email = str(row[465])
         studentID = str(row[0])
         if studentID not in emails and email != 'nan':
             emails[studentID] = email
         if len(studentID) == 9:
             if studentID not in records:
-                fullname = row[1].split('/')
-                lastName = fullname[0] 
-                firstName = fullname[1]
-                name = f'{firstName} {lastName}'
+                fullname = str(row[3]).split('/')
+                if len(fullname) > 1:
+                    lastName = fullname[0] 
+                    firstName = fullname[1]
+                    name = f'{firstName} {lastName}'
+                else:
+                    print(fullname)
+                    continue
                 names[studentID] = name
                 records[studentID] = set()
-            letterCode = row[10]
-            numberCode = int(row[11])
+            letterCode = row[5]
+            numberCode = int(row[7])
             courseCode = f'{letterCode} {numberCode:03d}'
-            finalGrade = str(row[14])
-            activity[studentID].add(row[2])
+            finalGrade = str(row[35])
+            activity[studentID].add(row[2]) # term code
             if passing(finalGrade):
                 records[studentID].add(courseCode)
                 # print(studentID, courseCode, finalGrade)
@@ -331,7 +338,7 @@ for dataset in files:
 
 
 actives = 0
-                
+
 for student in records:
     if active(activity[student]):
         printout(student, names[student], records[student], emails.get(student, ''), dataset)
