@@ -613,7 +613,7 @@ for index, response in data.iterrows():
                     assessments.append( (perc, name, due, assessmentDetail) )
         if fabs(total - 100) > THRESHOLD:
             error = f'\nParsing identified {total} percent for the grade instead of 100 percent.'
-        items = '\\\\\n\\hline\n'.join([ f'{ip} & {it} & {idl} & {idesc}' for (ip, it, idl, idesc) in assessments ])
+        items = '\\\\\n\\hline\n'.join([ f'{it} & {idl} & {ip} & {idesc}' for (ip, it, idl, idesc) in assessments ])
         outline = outline.replace('!!ITEMS!!', items)
         # at most 15 sessions as of now (Nabil and Diana Oka)
         sessions = [ ascii(response[header.index(f's{k}')]) for k in range(1, 16) ] # <---- NEED MORE SESSIONS???
