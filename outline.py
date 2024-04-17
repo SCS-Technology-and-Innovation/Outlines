@@ -173,7 +173,10 @@ def contact(text):
     return ' '.join(clean)
 
 def notanumber(s): # alejandro's fake line breaks
-    return not s.split()[0].isdigit()
+    parts = s.split()
+    if len(parts) == 0:
+        return True
+    return not parts[0].isdigit()
 
 def group(line):
     line = line.strip()
