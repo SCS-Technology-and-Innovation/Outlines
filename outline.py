@@ -117,9 +117,9 @@ def ascii(text):
         else:
             text = text + '\n#ne#\n' # assume the list keeps going until the end                   
     
-    text = text.replace('#ns#', '\n\\begin{enumerate}') # for sam
+    text = text.replace('#ns#', '\\begin{enumerate}') # for sam
     text = text.replace('#ne#', '\n\\end{enumerate}\n\n')
-    text = text.replace('#s#', '\n\\begin{itemize}')
+    text = text.replace('#s#', '\\begin{itemize}')
     text = text.replace('#e#', '\n\\end{itemize}\n\n')
     text = text.replace('#i#', '\n\\item ')
     if '&' in text and '\\&' not in text:
@@ -149,7 +149,7 @@ def ascii(text):
         joint = joint[1:-1]
     joint = joint.replace('.  ', '.\n\n') # paragraphs
     if joint[:7] == '\\begin{': # starts with a bulleted list
-        joint = '\phantom{skip}\\\\\\vspace*{-4mm}' + joint
+        joint = '\phantom{skip}\\\\\\vspace*{-16mm}' + joint
     return joint
 
 def contact(text):
@@ -487,6 +487,7 @@ for index, response in data.iterrows():
                 amount = amount[:-2] # no .0
             kind = ''
             if additionalDetails['Credit type'].iloc[0] == 'credits':
+                outline = outline.replace('!!COURSEEVAL!!', '\\input{mercury.tex}')                
                 if graduate:
                     outline = outline.replace('!!GRADING!!', '\\input{graduate.tex}')
                     kind = 'Graduate-level credit course'
@@ -499,6 +500,7 @@ for index, response in data.iterrows():
                 outline = outline.replace('!!PROFILE!!', '\\input{profilem.tex}')            
             else:
                 kind = 'Non-credit course'
+                outline = outline.replace('!!COURSEEVAL!!', '\\input{limesurvey.tex}')                                
                 outline = outline.replace('!!CREDITS!!', f'{amount} CEUs')
                 outline = outline.replace('!!GRADING!!', '\\input{noncredit.tex}')
                 outline = outline.replace('!!TRAINING!!', '')
@@ -542,10 +544,10 @@ for index, response in data.iterrows():
         tswmin = ascii(o2l(response[swmin]))
         if len(tswmin.strip()) == 0:
             tswmin = 'No specific software, operating system, or online service is required.'
-        tswmin = '\\subsubsection{Required software and services}\n\n' + tswmin
+        tswmin = '\\subsubsection{Required software and services}\n' + tswmin
         tswrec = ascii(o2l(response[swrec]))
         if len(tswrec.strip()) > 0:
-            tswrec = '\\subsubsection{Recommended software and services}\n\n' + tswrec
+            tswrec = '\\subsubsection{Recommended software and services}\n' + tswrec
         outline = outline.replace('!!SOFTWARE!!', tswmin + tswrec)        
         # internet
         timin = ascii(o2l(response[imin]))
@@ -553,7 +555,7 @@ for index, response in data.iterrows():
             timin = 'There are no specific requirements regarding the type of internet connection for this course.'        
         tirec = ascii(o2l(response[irec]))
         if len(tirec) > 0:
-            tirec = '\\subsubsection{Recommended internet connection}\n\n' + tirec         
+            tirec = '\\subsubsection{Recommended internet connection}\n' + tirec         
         outline = outline.replace('!!INTERNET!!', timin + tirec)
 
         # READINGS
@@ -561,12 +563,12 @@ for index, response in data.iterrows():
         if len(required) == 0:
             required = '\\subsection{Readings}Readings and assignments provided through myCourses.'
         else:
-            required = f'\\subsection{{Required Readings}}\n\n{required}\n'
+            required = f'\\subsection{{Required Readings}}\n{required}\n'
         outline = outline.replace('!!READINGS!!', required)
 
         optional = ascii(str(response[opt]))
         if len(optional) > 0:
-            optional = f'\\subsection{{Optional Materials}}\n\n{optional}\n\\newpage'
+            optional = f'\\subsection{{Optional Materials}}\n{optional}\n\\newpage'
         outline = outline.replace('!!OPTIONAL!!' , optional)
 
         # ADDITIONAL INFO
