@@ -149,7 +149,7 @@ def ascii(text):
         joint = joint[1:-1]
     joint = joint.replace('.  ', '.\n\n') # paragraphs
     if joint[:7] == '\\begin{': # starts with a bulleted list
-        joint = '\phantom{skip}\\\\\\vspace*{-16mm}' + joint
+        joint = '\phantom{skip}\\\\\\vspace*{-2mm}' + joint
     return joint
 
 def contact(text):
