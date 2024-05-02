@@ -259,7 +259,7 @@ for term in TAsheet:
         tacn = None
     tas = TAh.index('Section')
     tat = TAh.index('Teaching/Course Assistant')
-    tan = TAh.index('Candidate')
+    tan = TAh.index('Candidate') if 'Candidate' in TAh else TAh.index('Candidate Name')
     te = TAh.index('McGill Email')
     tok = TAh.index('Workday Status')
     for index, row in TAs.iterrows():
