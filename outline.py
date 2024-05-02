@@ -311,7 +311,7 @@ with open('outline.tex') as source:
 # load the outline responses
 data = None
 from sys import argv
-if 'sharepoint' not in argv:
+if 'msforms' in argv:
     responses = pd.ExcelFile('outline.xlsx')
     data  = responses.parse(responses.sheet_names[0])
 else:
