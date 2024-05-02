@@ -11,7 +11,6 @@ info = pd.read_csv('courses.csv')
 TAdef = 'Teaching_Assistants.xlsx'
 
 # update the term here
-
 fixed = 'Summer 2024'
 TAsheet = {   'Fall 2022': 'TAs_fall_2022',
             'Winter 2023': 'TAs_winter_2023',
@@ -19,7 +18,6 @@ TAsheet = {   'Fall 2022': 'TAs_fall_2022',
             'Summer 2023': 'TAs_Summer_2023',
             'Summer 2024': 'TAs_Summer_2024',            
               'Fall 2023': 'TAs_Fall_2023' } 
-
 
 skip = False 
 debug = False
@@ -260,8 +258,9 @@ for term in TAsheet:
     tas = TAh.index('Section')
     tat = TAh.index('Teaching/Course Assistant')
     tan = TAh.index('Candidate') if 'Candidate' in TAh else TAh.index('Candidate Name')
-    te = TAh.index('McGill Email')
+    te = TAh.index('Mcgill email') if 'Mcgill email' in TAh else TAh.index('McGill Email') 
     tok = TAh.index('Workday Status')
+
     for index, row in TAs.iterrows():
         name = row[tan]
         email = str(row[te]).lstrip().strip()
@@ -289,12 +288,13 @@ for term in TAsheet:
         if 'TA 120' in name:
             name = name.replace('TA 120', '')
         if 'TBC' in name:
+            print('Confirmation pending for TA', name)
             name = '\\textcolor{red}{To be confirmed}'
             email = ''
         name = name.strip().lstrip()
         if 'low registration' in name or len(name) == 0:
             continue
-        details = f'\item[{ast}]{{{name}{email}}}'
+        details = f'\item[{ast}]{{{name} {email}}}'
         number = '{:03d}'.format(number)
         section = '{:03d}'.format(section)
         status = str(row[tok])
