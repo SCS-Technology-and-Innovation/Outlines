@@ -17,7 +17,8 @@ TAsheet = {   'Fall 2022': 'TAs_fall_2022',
             'Winter 2024': 'TAs_Winter_2024',
             'Summer 2023': 'TAs_Summer_2023',
             'Summer 2024': 'TAs_Summer_2024',            
-              'Fall 2023': 'TAs_Fall_2023' } 
+              'Fall 2023': 'TAs_Fall_2023',
+              'Fall 2024': 'TAs_Fall_2024'} 
 
 skip = False 
 debug = False
@@ -248,6 +249,7 @@ for term in TAsheet:
         TAs  = TAinfo.parse(TAsheet[term])
     except:
         continue
+    print(TAs.columns.values.tolist())
     TAh = [h.strip() for h in TAs.columns.values.tolist()]
     tacl = TAh.index('Course') if 'Course' in TAh else TAh.index('Course code')
     tacn = None
@@ -624,6 +626,9 @@ for index, response in data.iterrows():
         sessions = [ ascii(response[header.index(f's{k}')]) for k in range(1, 16) ] # <---- NEED MORE SESSIONS???
         sessions = [ s.strip() for s in sessions ]
         content = '\n'.join([ f'\\item{{{ascii(r)}}}' if len(r) > 0 else '' for r in sessions ])
+        print("\n\n=====================================================\n")
+        print(content)
+        print("\n\n=====================================================\n")
         outline = outline.replace('\\item{!!CONTENT!!}', ascii(content))
         outline = outline.replace('!!INFO!!', '\\textcolor{blue}{Complementary information to be inserted soon.}')    
         if len(error) > 0:
