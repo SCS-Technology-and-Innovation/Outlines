@@ -626,9 +626,6 @@ for index, response in data.iterrows():
         sessions = [ ascii(response[header.index(f's{k}')]) for k in range(1, 16) ] # <---- NEED MORE SESSIONS???
         sessions = [ s.strip() for s in sessions ]
         content = '\n'.join([ f'\\item{{{ascii(r)}}}' if len(r) > 0 else '' for r in sessions ])
-        print("\n\n=====================================================\n")
-        print(content)
-        print("\n\n=====================================================\n")
         outline = outline.replace('\\item{!!CONTENT!!}', ascii(content))
         outline = outline.replace('!!INFO!!', '\\textcolor{blue}{Complementary information to be inserted soon.}')    
         if len(error) > 0:
