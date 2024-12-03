@@ -11,10 +11,11 @@ info = pd.read_csv('courses.csv')
 TAdef = 'Teaching_Assistants.xlsx'
 
 # update the term here
-fixed = 'Summer 2024'
+fixed = 'Winter 2025'
 TAsheet = {   'Fall 2022': 'TAs_fall_2022',
             'Winter 2023': 'TAs_winter_2023',
             'Winter 2024': 'TAs_Winter_2024',
+            'Winter 2025': 'TAs_Winter_2025',
             'Summer 2023': 'TAs_Summer_2023',
             'Summer 2024': 'TAs_Summer_2024',            
               'Fall 2023': 'TAs_Fall_2023',
